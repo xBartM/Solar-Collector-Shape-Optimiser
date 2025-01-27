@@ -36,16 +36,6 @@ public:
     void setXY(const unsigned short x, const unsigned short y, const double val);
     void showYourself();
     
-    vertex xProduct(const vertex& a, const vertex& b);
-    double dotProduct(const vertex& a, const vertex& b);
-    vertex substract(const vertex& a, const vertex& b);
-    vertex add(const vertex& a, const vertex& b);
-    vertex multiply(const vertex& a, double c);
-    vertex divide(const vertex& a, double c);
-    vertex unitNormal(const vertex& v0, const vertex& v1, const vertex& v2);
-    vertex unitNormal(const triangle& t);
-    vertex tMidPoint(const triangle& t);
-    vertex calculateReflection(const triangle& t, const vertex& ray);
     bool rayIsBlocked(const vertex& source, const vertex& ray, const triangle& target);
     bool rayMeetsObstacle(const vertex& source, const vertex& ray, const triangle& target);
     void computeMesh();

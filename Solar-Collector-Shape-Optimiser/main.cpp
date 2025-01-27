@@ -38,7 +38,7 @@ int main (int argc, char** argv)
         xsize   = 180+1;    // size of printbed (minus some spare space)
         ysize   = 940+1;    // length of aluminum rod
         hmax    = 180+1;    // height of printbed (minus some spare space)
-        popsize = 60;       // make popsize divisible by 4 xd
+        popsize = 8;       // make popsize divisible by 4 xd
     }
 
     random_device rd;
