@@ -7,7 +7,7 @@
 
 class Specimen {
 public:
-    uint32_t id;   // 0 to 255
+    uint32_t id;   // unique identifier for a Specimen (form 0 to a-lot)
 
     ushort xsize;   // size of the panel
     ushort ysize;
