@@ -4,7 +4,6 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
-// #include <algorithm>
 #include <random>
 
 #include <Solar-Collector-Shape-Optimiser/specimen.hpp>

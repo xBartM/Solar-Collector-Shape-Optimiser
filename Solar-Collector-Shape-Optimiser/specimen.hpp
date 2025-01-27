@@ -1,8 +1,6 @@
 #ifndef SPECIMEN_HPP
 #define SPECIMEN_HPP
 
-// #include <vector>
-// #include <string>
 
 #include <Solar-Collector-Shape-Optimiser/triangle.hpp>
 #include <Solar-Collector-Shape-Optimiser/obstacle.hpp>
