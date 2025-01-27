@@ -1,16 +1,20 @@
 # Compiler
 CXX = g++
 
-# Compiler flags
-CXXFLAGS = -std=c++17 -Wall -Wextra -fopenmp
-
+# Compiler flags (added -I for include directory)
+CXXFLAGS = -std=c++17 -Wall -Wextra -fopenmp -I.
+# Use '-g' to generate debug information, or '-O3' for optimization
+# CXXFLAGS += -g
+CXXFLAGS += -O3
 # Output executable name
 TARGET = solar_optimiser
 
-# Source files
-SOURCES = Solar-Collector-Shape-Optimiser/main.cpp
+# Source files (all in the Solar-Collector-Shape-Optimiser folder)
+SOURCES = Solar-Collector-Shape-Optimiser/main.cpp \
+          Solar-Collector-Shape-Optimiser/obstacle.cpp \
+          Solar-Collector-Shape-Optimiser/specimen.cpp
 
-# Object files
+# Object files (will be placed in the current directory)
 OBJECTS = $(SOURCES:.cpp=.o)
 
 # Default target
@@ -20,8 +24,8 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(TARGET)
 
-# Rule to build object files
-%.o: %.cpp
+# Rule to build object files (note the -I flag for header files)
+Solar-Collector-Shape-Optimiser/%.o: Solar-Collector-Shape-Optimiser/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Clean rule
