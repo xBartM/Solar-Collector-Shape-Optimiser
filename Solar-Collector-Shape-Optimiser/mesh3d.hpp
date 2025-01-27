@@ -1,6 +1,7 @@
 #ifndef MESH3D_HPP
 #define MESH3D_HPP
 
+#include <string>
 
 struct vertex {
     double x;
@@ -17,6 +18,20 @@ struct triangle {
 
     triangle() : normal(), v{} {};
     triangle(vertex n, vertex v1, vertex v2, vertex v3) : normal(n), v{v1, v2, v3} {};
+};
+
+class Obstacle {
+public:
+    int triangle_count;
+    triangle* mesh;
+
+    void moveXY(const double x, const double y);
+    void importSTL(const std::string filename);
+    void exportSTL(const std::string filename);
+
+    Obstacle();
+    Obstacle(const std::string filename);
+    ~Obstacle();
 };
 
 vertex xProduct(const vertex& a, const vertex& b);

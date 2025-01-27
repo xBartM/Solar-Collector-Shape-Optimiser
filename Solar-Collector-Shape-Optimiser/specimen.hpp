@@ -3,7 +3,7 @@
 
 
 #include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
-#include <Solar-Collector-Shape-Optimiser/obstacle.hpp>
+// #include <Solar-Collector-Shape-Optimiser/obstacle.hpp>
 
 class Specimen {
 public:

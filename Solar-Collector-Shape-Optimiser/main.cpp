@@ -7,7 +7,7 @@
 //#include <chrono>
 
 
-#include <Solar-Collector-Shape-Optimiser/obstacle.hpp>
+// #include <Solar-Collector-Shape-Optimiser/obstacle.hpp>
 #include <Solar-Collector-Shape-Optimiser/specimen.hpp>
 
 using namespace std;
