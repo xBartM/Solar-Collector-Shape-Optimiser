@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <Solar-Collector-Shape-Optimiser/triangle.hpp>
+#include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
 
 class Obstacle {
 public:
