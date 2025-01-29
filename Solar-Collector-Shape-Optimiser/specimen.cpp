@@ -219,7 +219,7 @@ void Specimen::computeFitness(const vertex* rays, const int count_rays) {
         {
             // per triangle loop
             blocked = false;
-            for (int obsno = 0; obsno < obstacle->triangle_count; obsno++)
+            for (uint32_t obsno = 0; obsno < obstacle->triangle_count; obsno++)
             {
                 // per obstacle triangle loop
                 if (rayIsBlocked(mesh_midpoints[trino], rays[rayno], obstacle->mesh[obsno])) ///  optimization potential (?) - collides(...,..., obstacle->mesh)
@@ -234,7 +234,7 @@ void Specimen::computeFitness(const vertex* rays, const int count_rays) {
             {   // check if reflected ray hits the obstacle
                 reflection = calculateReflection(mesh[trino], rays[rayno]);
                 // std::cout << reflection.x << ' ' << reflection.y << ' ' << reflection.z << std::endl;
-                for (int obsno = 0; obsno < obstacle->triangle_count; obsno++)
+                for (uint32_t obsno = 0; obsno < obstacle->triangle_count; obsno++)
                 {
                     if(rayMeetsObstacle(mesh_midpoints[trino], reflection, obstacle->mesh[obsno]) == true)
                     {

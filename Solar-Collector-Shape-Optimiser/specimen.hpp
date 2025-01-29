@@ -17,7 +17,7 @@ public:
     double fitness; // fitness of a specimen (% of triangles that reflected the light)
     double norm_fitness;    // normalized fitness
 
-    Mesh3d mesh; // mesh calculated from 'shape' member
+    // Mesh3d mesh; // mesh calculated from 'shape' member
     triangle* mesh; // mesh for computing reflections
     uint32_t triangle_count;
     vertex* mesh_midpoints; // precalculated mid points of every triangle of a mesh
