@@ -11,11 +11,9 @@
 
 
 Specimen::Specimen(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs)
-    : id(num), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) {
+    : id(num), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
     shape = new double[xs*ys];
-    // mesh  = new triangle[(xs-1)*(ys-1)*2];   // ex. 3x3 shape has 4 rectangles -> 8 triangles
-    // shape_mesh((xs-1)*(ys-1)*2);   // ex. 3x3 shape has 4 rectangles -> 8 triangles
-    mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh
+    mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
 
     fitness = 0;
     norm_fitness = 0;
@@ -28,11 +26,9 @@ Specimen::Specimen (const Specimen & other)
     reflecting = other.reflecting;
 
     shape = new double[other.xsize*other.ysize];
-    // mesh  = new triangle[(other.xsize-1)*(other.ysize-1)*2];   // ex. 3x3 shape has 4 rectangles -> 8 triangles
     mesh_midpoints = new vertex[(other.xsize-1)*(other.ysize-1)*2]; // same size as the mesh
 
     std::copy(other.shape, other.shape + other.xsize*other.ysize, shape);
-    // std::copy(other.mesh, other.mesh + (other.xsize-1)*(other.ysize-1)*2, mesh);
     std::copy(other.mesh_midpoints, other.mesh_midpoints + (other.xsize-1)*(other.ysize-1)*2, mesh_midpoints);
     
 }
@@ -45,18 +41,15 @@ Specimen& Specimen::operator= (const Specimen & other)
     hmax = other.hmax;
     fitness = other.fitness;
     norm_fitness = other.norm_fitness;
-    // triangle_count = other.triangle_count;
 
     obstacle = other.obstacle;
     reflecting = other.reflecting;
 
     shape = new double[other.xsize*other.ysize];
     shape_mesh = Mesh3d(other.shape_mesh); // we can use Mesh3d operator=
-    // mesh  = new triangle[(other.xsize-1)*(other.ysize-1)*2];   // ex. 3x3 shape has 4 rectangles -> 8 triangles
     mesh_midpoints = new vertex[(other.xsize-1)*(other.ysize-1)*2]; // same size as the mesh
 
     std::copy(other.shape, other.shape + other.xsize*other.ysize, shape);
-    // std::copy(other.mesh, other.mesh + (other.xsize-1)*(other.ysize-1)*2, mesh);
     std::copy(other.mesh_midpoints, other.mesh_midpoints + (other.xsize-1)*(other.ysize-1)*2, mesh_midpoints);
     
     return *this;
@@ -64,7 +57,6 @@ Specimen& Specimen::operator= (const Specimen & other)
 
 Specimen::~Specimen() {
     delete[] shape;
-    // delete[] mesh;
     delete[] mesh_midpoints;
 }
 

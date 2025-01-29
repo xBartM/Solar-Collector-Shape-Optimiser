@@ -18,8 +18,6 @@ public:
     double norm_fitness;    // normalized fitness
 
     Mesh3d shape_mesh; // mesh calculated from 'shape' member
-    // triangle* mesh; // mesh for computing reflections
-    // uint32_t triangle_count;
     vertex* mesh_midpoints; // precalculated mid points of every triangle of a mesh
 
     std::vector<triangle> reflecting; // I think it's for checking the shape of the mesh built only from triangles that reflect the ray directly onto the obstacle - it's an overkill to store all triangles, just store bools or something
