@@ -5,8 +5,17 @@
 
 #include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
 
+
+Mesh3d::Mesh3d() {}
+
+Mesh3d::Mesh3d(const uint32_t triangle_count) : triangle_count(triangle_count) {}
+
+Mesh3d::Mesh3d(const std::string filename) { importSTL(filename); }
+
+Mesh3d::~Mesh3d() { delete[] mesh; }
+
 void Mesh3d::moveXY(const double x, const double y) {
-    for (int i = 0; i < triangle_count; i++) {
+    for (uint32_t i = 0; i < triangle_count; i++) {
         mesh[i].v[0].x += x; mesh[i].v[1].x += x; mesh[i].v[2].x += x;
         mesh[i].v[0].y += y; mesh[i].v[1].y += y; mesh[i].v[2].y += y;
     }
@@ -98,7 +107,7 @@ void Mesh3d::exportSTL(const std::string filename) {
     stlout.open(filename, std::ofstream::trunc);
     stlout << "solid Mesh3d" << std::endl;
 
-    for (int i = 0; i < triangle_count; i++) {
+    for (uint32_t i = 0; i < triangle_count; i++) {
         stlout << "facet normal " << mesh[i].normal.x << " " << mesh[i].normal.y << " " << mesh[i].normal.z << std::endl;
         stlout << "   outer loop" << std::endl;
         stlout << "      vertex " << mesh[i].v[0].x << " " << mesh[i].v[0].y << " " << mesh[i].v[0].z << std::endl;
@@ -111,13 +120,6 @@ void Mesh3d::exportSTL(const std::string filename) {
     stlout << "endsolid Mesh3d" << std::endl;
     stlout.close();
 }
-
-Mesh3d::Mesh3d() {}
-
-Mesh3d::Mesh3d(const std::string filename) { importSTL(filename); }
-
-Mesh3d::~Mesh3d() { delete[] mesh; }
-
 
 vertex xProduct(const vertex& a, const vertex& b) {
     return vertex(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);

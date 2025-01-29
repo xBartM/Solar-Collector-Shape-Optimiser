@@ -1,6 +1,7 @@
 #ifndef MESH3D_HPP
 #define MESH3D_HPP
 
+#include <cstdint>
 #include <string>
 
 struct vertex {
@@ -22,16 +23,18 @@ struct triangle {
 
 class Mesh3d {
 public:
-    int triangle_count;
-    triangle* mesh;
+    uint32_t triangle_count; // number of triangles in mesh
+    triangle* mesh; // mesh consisting of multiple triangles
+
+
+    Mesh3d();
+    Mesh3d(const uint32_t triangle_count);
+    Mesh3d(const std::string filename);
+    ~Mesh3d();
 
     void moveXY(const double x, const double y);
     void importSTL(const std::string filename);
     void exportSTL(const std::string filename);
-
-    Mesh3d();
-    Mesh3d(const std::string filename);
-    ~Mesh3d();
 };
 
 vertex xProduct(const vertex& a, const vertex& b);

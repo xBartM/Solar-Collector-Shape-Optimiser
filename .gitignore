@@ -1,2 +1,4 @@
 *.o
 solar_optimiser
+/wsl
+obstacle.stl
