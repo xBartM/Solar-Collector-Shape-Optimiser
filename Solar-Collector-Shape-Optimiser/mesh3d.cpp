@@ -8,11 +8,57 @@
 
 Mesh3d::Mesh3d() {}
 
-Mesh3d::Mesh3d(const uint32_t triangle_count) : triangle_count(triangle_count) {}
+Mesh3d::Mesh3d(const uint32_t triangle_count) 
+    : triangle_count(triangle_count) {
+
+    // Allocate memory for the new mesh based on the copied triangle count
+    mesh = new triangle[triangle_count];
+
+    }
 
 Mesh3d::Mesh3d(const std::string filename) { importSTL(filename); }
 
+Mesh3d::Mesh3d(const Mesh3d &other) 
+    : triangle_count(other.triangle_count) {
+   
+    // Allocate memory for the new mesh based on the copied triangle count
+    mesh = new triangle[other.triangle_count];
+
+    // Deep copy each triangle
+    for (uint32_t i = 0; i < other.triangle_count; ++i) {
+        mesh[i] = other.mesh[i];
+    }
+}
+
 Mesh3d::~Mesh3d() { delete[] mesh; }
+
+
+triangle& Mesh3d::operator[] (const uint32_t index) {
+    // if (index >= triangle_count) {
+    //     throw std::out_of_range("Index out of bounds");
+    // }
+    return mesh[index];
+}
+
+Mesh3d& Mesh3d::operator= (const Mesh3d& other) {
+    if (this != &other) { // Self-assignment check
+        // 1. Delete existing data
+        delete[] mesh;
+
+        // 2. Copy triangle count
+        triangle_count = other.triangle_count;
+
+        // 3. Allocate new memory
+        mesh = new triangle[triangle_count];
+
+        // 4. Deep copy triangles
+        for (uint32_t i = 0; i < triangle_count; ++i) {
+            mesh[i] = other.mesh[i];
+        }
+    }
+    return *this;
+}
+
 
 void Mesh3d::moveXY(const double x, const double y) {
     for (uint32_t i = 0; i < triangle_count; i++) {

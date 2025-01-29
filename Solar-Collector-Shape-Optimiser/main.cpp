@@ -119,7 +119,7 @@ int main (int argc, char** argv)
     while (true)
     {
         // start = chrono::high_resolution_clock::now();
-        #pragma omp parallel for num_threads(3)
+        #pragma omp parallel for num_threads(4)
         for (auto pop = population.rbegin(); pop != population.rend(); pop++)
             if ((*pop)->fitness == 0)
                 (*pop)->computeFitness(&ray, 1);

@@ -30,7 +30,11 @@ public:
     Mesh3d();
     Mesh3d(const uint32_t triangle_count);
     Mesh3d(const std::string filename);
+    Mesh3d (const Mesh3d & other); // copy constructor
     ~Mesh3d();
+
+    triangle& operator[](const uint32_t index);
+    Mesh3d& operator= (const Mesh3d& other);
 
     void moveXY(const double x, const double y);
     void importSTL(const std::string filename);
