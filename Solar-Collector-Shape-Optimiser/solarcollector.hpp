@@ -22,10 +22,12 @@ public:
     Mesh3d* obstacle; // pointer to obstacle to read its mesh
 
 
-    SolarCollector(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs);
+    SolarCollector (const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs);
     SolarCollector (const SolarCollector & other);
+    SolarCollector (SolarCollector&& other) noexcept;
+    SolarCollector& operator= (SolarCollector&& other) noexcept;
     SolarCollector& operator= (const SolarCollector & other);
-    auto operator<=>(const SolarCollector& other) const { return genes <=> other.genes; } // Add spaceship operator for comparison
+    auto operator<=> (const SolarCollector& other) const { return genes <=> other.genes; } // Add spaceship operator for comparison
     ~SolarCollector();
 
     double getXY(const unsigned short x, const unsigned short y) const;

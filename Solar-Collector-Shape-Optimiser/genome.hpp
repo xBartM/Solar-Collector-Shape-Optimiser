@@ -11,8 +11,10 @@ public:
     double fitness; // fitness of this set of chromosomes (% of triangles that reflected the light)
 
 
-    Genome(const uint32_t id, const uint32_t chromosome_size);
+    Genome (const uint32_t id, const uint32_t chromosome_size);
     Genome (const Genome & other);
+    Genome (Genome&& other) noexcept;
+    Genome& operator= (Genome&& other) noexcept;
     Genome& operator= (const Genome & other);
     auto operator<=>(const Genome& other) const { return std::compare_three_way{}(fitness, other.fitness); }
     ~Genome();

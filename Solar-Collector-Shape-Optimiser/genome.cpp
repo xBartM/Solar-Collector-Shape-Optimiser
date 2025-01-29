@@ -18,6 +18,31 @@ Genome::Genome (const Genome & other)
     std::copy(other.shape, other.shape + other.chromosome_size, shape);    
 }
 
+Genome::Genome(Genome&& other) noexcept
+    : id(std::move(other.id)),
+      chromosome_size(std::move(other.chromosome_size)),
+      shape(other.shape),
+      fitness(std::move(other.fitness))
+{
+    other.shape = nullptr;
+    other.chromosome_size = 0; // set to some default value to avoid problems later
+}
+
+Genome& Genome::operator= (Genome&& other) noexcept {
+    if (this != &other)
+    {
+        delete[] shape;
+        id = std::move(other.id);
+        chromosome_size = std::move(other.chromosome_size);
+        fitness = std::move(other.fitness);
+        shape = other.shape;
+
+        other.shape = nullptr;
+        other.chromosome_size = 0; // set to some default value to avoid problems later
+    }
+    return *this;
+}
+
 Genome& Genome::operator= (const Genome & other)
 {
     id = other.id;

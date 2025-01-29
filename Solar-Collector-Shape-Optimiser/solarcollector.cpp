@@ -26,6 +26,37 @@ SolarCollector::SolarCollector (const SolarCollector & other)
     
 }
 
+SolarCollector::SolarCollector (SolarCollector&& other) noexcept
+    : xsize(std::move(other.xsize)),
+      ysize(std::move(other.ysize)),
+      hmax(std::move(other.hmax)),
+      genes(std::move(other.genes)),
+      shape_mesh(std::move(other.shape_mesh)),
+      mesh_midpoints(other.mesh_midpoints),
+      reflecting(std::move(other.reflecting)),
+      obstacle(std::move(other.obstacle))
+{
+    other.mesh_midpoints = nullptr;
+}
+
+SolarCollector& SolarCollector::operator= (SolarCollector&& other) noexcept {
+    if (this != &other)
+    {
+        xsize = std::move(other.xsize);
+        ysize = std::move(other.ysize);
+        hmax = std::move(other.hmax);
+        genes = std::move(other.genes);
+        shape_mesh = std::move(other.shape_mesh);
+        reflecting = std::move(other.reflecting);
+        obstacle = std::move(other.obstacle);
+
+        delete[] mesh_midpoints;
+        mesh_midpoints = other.mesh_midpoints;
+        other.mesh_midpoints = nullptr;
+    }
+    return *this;
+}
+
 SolarCollector& SolarCollector::operator= (const SolarCollector & other)
 {
     xsize = other.xsize;
