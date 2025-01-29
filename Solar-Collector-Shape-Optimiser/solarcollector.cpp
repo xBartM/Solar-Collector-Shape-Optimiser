@@ -246,9 +246,7 @@ void SolarCollector::exportReflectionAsSTL() {
     reflecting_mesh.exportSTL(std::to_string(genes.id) + "_reflection.stl");
 }
 
-bool sortBestToWorst (SolarCollector* a, SolarCollector* b) { return (a->genes.fitness > b->genes.fitness); }
-
-SolarCollector* crossoverAndMutate (SolarCollector & a, SolarCollector & b, int id, double crossover_bias, int mutation_percent)
+SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, int id, double crossover_bias, int mutation_percent)
 {
     SolarCollector* temp = new SolarCollector(id, a.xsize, a.ysize, a.hmax, a.obstacle);
 
@@ -278,5 +276,7 @@ SolarCollector* crossoverAndMutate (SolarCollector & a, SolarCollector & b, int 
     temp->computeMesh();
     temp->computeMeshMidpoints();
 
-    return temp;
+    SolarCollector ret(*temp);
+    delete temp;
+    return ret;
 }

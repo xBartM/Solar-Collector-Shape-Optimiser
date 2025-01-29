@@ -14,6 +14,7 @@ public:
     Genome(const uint32_t id, const uint32_t chromosome_size);
     Genome (const Genome & other);
     Genome& operator= (const Genome & other);
+    auto operator<=>(const Genome& other) const { return std::compare_three_way{}(fitness, other.fitness); }
     ~Genome();
 
     // double getXY(const unsigned short x, const unsigned short y) const;

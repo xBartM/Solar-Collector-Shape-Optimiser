@@ -85,14 +85,15 @@ int main (int argc, char** argv)
     // return 0;
 
     // start = chrono::high_resolution_clock::now();
-    vector<SolarCollector*> population;
+    vector<SolarCollector> population;
+    population.reserve(popsize); // reserve space to avoid reallocations
     for (int i = 0, j = 0; i < popsize; i++, j++)
     {
-        population.push_back(new SolarCollector(rand_id(mt), xsize, ysize, hmax, &obs));
+        population.emplace_back(rand_id(mt), xsize, ysize, hmax, &obs);
         for (int k = 0; k < xsize*ysize; k++)
-            population[i]->setXY(k, 0, dist(mt));
-        population[i]->computeMesh();
-        population[i]->computeMeshMidpoints();
+            population[i].setXY(k, 0, dist(mt));
+        population[i].computeMesh();
+        population[i].computeMeshMidpoints();
         // population[i].computeFitness(&ray, 1);
         // if(population[i].genes.fitness < 1000)
         // {
@@ -121,24 +122,24 @@ int main (int argc, char** argv)
         // start = chrono::high_resolution_clock::now();
         #pragma omp parallel for num_threads(4)
         for (auto pop = population.rbegin(); pop != population.rend(); pop++)
-            if ((*pop)->genes.fitness == 0)
-                (*pop)->computeFitness(&ray, 1);
+            if (pop->genes.fitness == 0)
+                pop->computeFitness(&ray, 1);
                 // else cout << "skipped" << endl;
             // pop.exportReflectionsAsSTL(); // ??
         // end = chrono::high_resolution_clock::now();
         // deltatime = end - start;
         // std::cout << "Computing fitness: " << deltatime.count() << " s\n";
-        sort(population.begin(), population.end(), sortBestToWorst); // sorted best to worst
+        sort(population.begin(), population.end()); // WRONG WAY (but it works) // sorted best to worst
 
         cout << to_string(generation);
         for (auto pop = population.begin(); pop != population.end(); pop++)
-            cout << ";" << to_string((*pop)->genes.fitness);
+            cout << ";" << to_string(pop->genes.fitness);
         cout << endl;
 
         // start = chrono::high_resolution_clock::now();
         for (int i = 0; i < popsize/3 ; i++)    // remove the weak
         {
-            delete population.back();
+            // delete population.back();
             population.pop_back();
         }
 
@@ -149,7 +150,8 @@ int main (int argc, char** argv)
         // start = chrono::high_resolution_clock::now();
         for (auto pop = population.begin(); population.size() < popsize; pop++)
         {
-            population.push_back(crossoverAndMutate(*(*pop), *(*(pop+1)), rand_id(mt), 60, 5));
+            // this could be offspring constructor xDD
+            population.push_back(crossoverAndMutate(*pop, *(pop+1), rand_id(mt), 60, 5));
         }
         // end = chrono::high_resolution_clock::now();
         // deltatime = end - start;

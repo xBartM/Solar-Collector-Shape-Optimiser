@@ -25,6 +25,7 @@ public:
     SolarCollector(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs);
     SolarCollector (const SolarCollector & other);
     SolarCollector& operator= (const SolarCollector & other);
+    auto operator<=>(const SolarCollector& other) const { return genes <=> other.genes; } // Add spaceship operator for comparison
     ~SolarCollector();
 
     double getXY(const unsigned short x, const unsigned short y) const;
@@ -41,8 +42,7 @@ public:
 };
 
 // move both of those to Genes
-bool sortBestToWorst (SolarCollector* a, SolarCollector* b); 
-SolarCollector* crossoverAndMutate (SolarCollector & a, SolarCollector & b, int id, double crossover_bias, int mutation_percent);
+SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, int id, double crossover_bias, int mutation_percent);
 
 
 #endif // SOLARCOLLECTOR_HPP

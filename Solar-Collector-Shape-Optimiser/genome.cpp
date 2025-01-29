@@ -1,10 +1,7 @@
 #include <cstdint>
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <cmath>
-#include <random>
+#include <algorithm>
+// #include <compare>
+
 
 #include <Solar-Collector-Shape-Optimiser/genome.hpp>
 
