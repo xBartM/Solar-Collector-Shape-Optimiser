@@ -20,7 +20,7 @@ struct triangle {
     triangle(vertex n, vertex v1, vertex v2, vertex v3) : normal(n), v{v1, v2, v3} {};
 };
 
-class Obstacle {
+class Mesh3d {
 public:
     int triangle_count;
     triangle* mesh;
@@ -29,9 +29,9 @@ public:
     void importSTL(const std::string filename);
     void exportSTL(const std::string filename);
 
-    Obstacle();
-    Obstacle(const std::string filename);
-    ~Obstacle();
+    Mesh3d();
+    Mesh3d(const std::string filename);
+    ~Mesh3d();
 };
 
 vertex xProduct(const vertex& a, const vertex& b);

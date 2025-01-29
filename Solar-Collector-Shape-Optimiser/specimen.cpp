@@ -10,7 +10,7 @@
 #include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
 
 
-Specimen::Specimen(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Obstacle* obs)
+Specimen::Specimen(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs)
     : id(num), xsize(xs), ysize(ys), hmax(hm), triangle_count((xs - 1) * (ys - 1) * 2), obstacle(obs) {
     shape = new double[xs*ys];
     mesh  = new triangle[(xs-1)*(ys-1)*2];   // ex. 3x3 shape has 4 rectangles -> 8 triangles

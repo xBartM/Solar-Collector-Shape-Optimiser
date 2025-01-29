@@ -3,7 +3,6 @@
 
 
 #include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
-// #include <Solar-Collector-Shape-Optimiser/obstacle.hpp>
 
 class Specimen {
 public:
@@ -24,10 +23,10 @@ public:
 
     std::vector<triangle> reflecting;
 
-    Obstacle* obstacle; // pointer to obstacle to read its mesh
+    Mesh3d* obstacle; // pointer to obstacle to read its mesh
 
 
-    Specimen(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Obstacle* obs);
+    Specimen(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs);
     Specimen (const Specimen & other);
     Specimen& operator= (const Specimen & other);
     ~Specimen();

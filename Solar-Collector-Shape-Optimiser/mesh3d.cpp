@@ -5,14 +5,14 @@
 
 #include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
 
-void Obstacle::moveXY(const double x, const double y) {
+void Mesh3d::moveXY(const double x, const double y) {
     for (int i = 0; i < triangle_count; i++) {
         mesh[i].v[0].x += x; mesh[i].v[1].x += x; mesh[i].v[2].x += x;
         mesh[i].v[0].y += y; mesh[i].v[1].y += y; mesh[i].v[2].y += y;
     }
 }
 
-void Obstacle::importSTL(const std::string filename) {
+void Mesh3d::importSTL(const std::string filename) {
     std::string line;
     std::ifstream file(filename, std::ifstream::in);
 
@@ -92,11 +92,11 @@ void Obstacle::importSTL(const std::string filename) {
     }
 }
 
-void Obstacle::exportSTL(const std::string filename) {
+void Mesh3d::exportSTL(const std::string filename) {
     std::ofstream stlout;
     
     stlout.open(filename, std::ofstream::trunc);
-    stlout << "solid obstacle" << std::endl;
+    stlout << "solid Mesh3d" << std::endl;
 
     for (int i = 0; i < triangle_count; i++) {
         stlout << "facet normal " << mesh[i].normal.x << " " << mesh[i].normal.y << " " << mesh[i].normal.z << std::endl;
@@ -108,15 +108,15 @@ void Obstacle::exportSTL(const std::string filename) {
         stlout << "endfacet" << std::endl;
     }
 
-    stlout << "endsolid obstacle" << std::endl;
+    stlout << "endsolid Mesh3d" << std::endl;
     stlout.close();
 }
 
-Obstacle::Obstacle() {}
+Mesh3d::Mesh3d() {}
 
-Obstacle::Obstacle(const std::string filename) { importSTL(filename); }
+Mesh3d::Mesh3d(const std::string filename) { importSTL(filename); }
 
-Obstacle::~Obstacle() { delete[] mesh; }
+Mesh3d::~Mesh3d() { delete[] mesh; }
 
 
 vertex xProduct(const vertex& a, const vertex& b) {

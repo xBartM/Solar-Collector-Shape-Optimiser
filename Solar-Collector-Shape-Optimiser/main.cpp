@@ -7,7 +7,6 @@
 //#include <chrono>
 
 
-// #include <Solar-Collector-Shape-Optimiser/obstacle.hpp>
 #include <Solar-Collector-Shape-Optimiser/specimen.hpp>
 
 using namespace std;
@@ -49,7 +48,7 @@ int main (int argc, char** argv)
 
     //std::cout << dist(mt) << "\n";
 
-    Obstacle obs("obstacle.stl");
+    Mesh3d obs("obstacle.stl");
     obs.moveXY((xsize-1)/2, (hmax-1)/2);
     //obs.exportSTL("my_obstacle.stl");
 
