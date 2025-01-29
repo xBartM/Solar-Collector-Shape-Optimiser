@@ -12,7 +12,7 @@ TARGET = solar_optimiser
 # Source files (all in the Solar-Collector-Shape-Optimiser folder)
 SOURCES = Solar-Collector-Shape-Optimiser/main.cpp \
 		  Solar-Collector-Shape-Optimiser/mesh3d.cpp \
-          Solar-Collector-Shape-Optimiser/specimen.cpp \
+          Solar-Collector-Shape-Optimiser/genome.cpp \
           Solar-Collector-Shape-Optimiser/solarcollector.cpp 
 		  
 

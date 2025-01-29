@@ -3,7 +3,7 @@
 
 
 #include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
-#include <Solar-Collector-Shape-Optimiser/specimen.hpp>
+#include <Solar-Collector-Shape-Optimiser/genome.hpp>
 
 class SolarCollector {
 public:
@@ -11,7 +11,7 @@ public:
     ushort ysize;
     ushort hmax;  // maximal height (dictated by max printing height)
 
-    Specimen genes; // everything GA related
+    Genome genes; // everything GA related
     // double* shape;  // table for heights at x and y coordinates -- access via (getter, but..) [y*xsize+x] -- this is chromosome
 
     Mesh3d shape_mesh; // mesh calculated from 'shape' member

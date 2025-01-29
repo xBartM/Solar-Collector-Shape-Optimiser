@@ -11,7 +11,6 @@
 
 SolarCollector::SolarCollector(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs)
     : xsize(xs), ysize(ys), hmax(hm), genes(num, (xs-1)*(ys-1)*2), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
-    // shape = new double[xs*ys];
     mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
 
 }
@@ -21,10 +20,8 @@ SolarCollector::SolarCollector (const SolarCollector & other)
     obstacle = other.obstacle;
     reflecting = other.reflecting;
 
-    // shape = new double[other.xsize*other.ysize];
     mesh_midpoints = new vertex[(other.xsize-1)*(other.ysize-1)*2]; // same size as the mesh
 
-    // std::copy(other.shape, other.shape + other.xsize*other.ysize, shape);
     std::copy(other.mesh_midpoints, other.mesh_midpoints + (other.xsize-1)*(other.ysize-1)*2, mesh_midpoints);
     
 }
@@ -40,11 +37,9 @@ SolarCollector& SolarCollector::operator= (const SolarCollector & other)
     obstacle = other.obstacle;
     reflecting = other.reflecting;
 
-    // shape = new double[other.xsize*other.ysize];
     shape_mesh = Mesh3d(other.shape_mesh); // we can use Mesh3d operator=
     mesh_midpoints = new vertex[(other.xsize-1)*(other.ysize-1)*2]; // same size as the mesh
 
-    // std::copy(other.shape, other.shape + other.xsize*other.ysize, shape);
     std::copy(other.mesh_midpoints, other.mesh_midpoints + (other.xsize-1)*(other.ysize-1)*2, mesh_midpoints);
     
     return *this;
@@ -57,7 +52,6 @@ SolarCollector::~SolarCollector() {
 
 double SolarCollector::getXY(const unsigned short x, const unsigned short y) const {
     return genes.shape[y * xsize + x];
-    // return genes.getXY(x, y);
 }
 
 void SolarCollector::setXY(const unsigned short x, const unsigned short y, const double val) {
@@ -67,7 +61,6 @@ void SolarCollector::setXY(const unsigned short x, const unsigned short y, const
         genes.shape[y * xsize + x] = hmax;
     else
         genes.shape[y * xsize + x] = val;
-    // genes.setXY(x, y, val);
 }
 
 void SolarCollector::showYourself() {
@@ -77,7 +70,6 @@ void SolarCollector::showYourself() {
             std::cout << getXY(x, y) << " ";
         std::cout << std::endl;
     }
-    // genes.showYourself();
 }
 
 bool SolarCollector::rayIsBlocked(const vertex& source, const vertex& ray, const triangle& target) {

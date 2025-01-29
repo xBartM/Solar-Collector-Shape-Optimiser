@@ -6,22 +6,22 @@
 #include <cmath>
 #include <random>
 
-#include <Solar-Collector-Shape-Optimiser/specimen.hpp>
+#include <Solar-Collector-Shape-Optimiser/genome.hpp>
 
 
-Specimen::Specimen(const uint32_t id, const uint32_t chromosome_size)
+Genome::Genome(const uint32_t id, const uint32_t chromosome_size)
     : id(id), chromosome_size(chromosome_size) { 
     shape = new double[chromosome_size];
     fitness = 0;
 }
 
-Specimen::Specimen (const Specimen & other)
+Genome::Genome (const Genome & other)
     : id(other.id), chromosome_size(other.chromosome_size), fitness(other.fitness) {
     shape = new double[other.chromosome_size];
     std::copy(other.shape, other.shape + other.chromosome_size, shape);    
 }
 
-Specimen& Specimen::operator= (const Specimen & other)
+Genome& Genome::operator= (const Genome & other)
 {
     id = other.id;
     chromosome_size = other.chromosome_size;
@@ -33,15 +33,15 @@ Specimen& Specimen::operator= (const Specimen & other)
     return *this;
 }
 
-Specimen::~Specimen() {
+Genome::~Genome() {
     delete[] shape;
 }
 
-// double Specimen::getXY(const unsigned short x, const unsigned short y) const {
+// double Genome::getXY(const unsigned short x, const unsigned short y) const {
 //     return shape[y * xsize + x];
 // }
 
-// void Specimen::setXY(const unsigned short x, const unsigned short y, const double val) {
+// void Genome::setXY(const unsigned short x, const unsigned short y, const double val) {
 //     if (val < 0)
 //         shape[y * xsize + x] = 0;
 //     else if (val > hmax)
@@ -50,7 +50,7 @@ Specimen::~Specimen() {
 //         shape[y * xsize + x] = val;
 // }
 
-// void Specimen::showYourself() {
+// void Genome::showYourself() {
 //     std::cout << (int)id << " " << xsize << " " << ysize << std::endl;
 //     for (int y = 0; y < ysize; y++) {
 //         for (int x = 0; x < xsize; x++)
