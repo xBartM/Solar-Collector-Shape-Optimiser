@@ -244,57 +244,16 @@ void Specimen::computeFitness(const vertex* rays, const int count_rays) {
 }
 
 void Specimen::exportAsSTL(std::string name) {
-    std::ofstream stlout;
-    std::stringstream ss;
-
-    for (uint32_t i = 0; i < shape_mesh.triangle_count; i += 2) {
-        ss << "facet normal " << shape_mesh[i].normal.x << " " << shape_mesh[i].normal.y << " " << shape_mesh[i].normal.z << std::endl
-           << "   outer loop" << std::endl
-           << "      vertex " << shape_mesh[i].v[0].x << " " << shape_mesh[i].v[0].y << " " << shape_mesh[i].v[0].z << std::endl
-           << "      vertex " << shape_mesh[i].v[1].x << " " << shape_mesh[i].v[1].y << " " << shape_mesh[i].v[1].z << std::endl
-           << "      vertex " << shape_mesh[i].v[2].x << " " << shape_mesh[i].v[2].y << " " << shape_mesh[i].v[2].z << std::endl
-           << "   endloop" << std::endl
-           << "endfacet" << std::endl
-
-           << "facet normal " << shape_mesh[i + 1].normal.x << " " << shape_mesh[i + 1].normal.y << " " << shape_mesh[i + 1].normal.z << std::endl
-           << "   outer loop" << std::endl
-           << "      vertex " << shape_mesh[i + 1].v[0].x << " " << shape_mesh[i + 1].v[0].y << " " << shape_mesh[i + 1].v[0].z << std::endl
-           << "      vertex " << shape_mesh[i + 1].v[1].x << " " << shape_mesh[i + 1].v[1].y << " " << shape_mesh[i + 1].v[1].z << std::endl
-           << "      vertex " << shape_mesh[i + 1].v[2].x << " " << shape_mesh[i + 1].v[2].y << " " << shape_mesh[i + 1].v[2].z << std::endl
-           << "   endloop" << std::endl
-           << "endfacet" << std::endl;
-    }
-
-    stlout.open(name, std::ofstream::trunc);
-
-    stlout << "solid " << std::to_string(id) << std::endl;
-    stlout << ss.rdbuf();
-    stlout << "endsolid " << std::to_string(id) << std::endl;
-    
-    stlout.close();
+    shape_mesh.exportSTL(name);
 }
 
 void Specimen::exportReflectionAsSTL() {
-    std::ofstream stlout;
-    std::stringstream ss;
-
-    for (auto i = reflecting.begin(); i != reflecting.end(); i++) {
-        ss << "facet normal " << i->normal.x << " " << i->normal.y << " " << i->normal.z << std::endl
-           << "   outer loop" << std::endl
-           << "      vertex " << i->v[0].x << " " << i->v[0].y << " " << i->v[0].z << std::endl
-           << "      vertex " << i->v[1].x << " " << i->v[1].y << " " << i->v[1].z << std::endl
-           << "      vertex " << i->v[2].x << " " << i->v[2].y << " " << i->v[2].z << std::endl
-           << "   endloop" << std::endl
-           << "endfacet" << std::endl;
+    Mesh3d reflecting_mesh(static_cast<uint32_t>(reflecting.size()));
+    for (size_t i = 0; i < reflecting.size(); ++i) {
+        reflecting_mesh[static_cast<uint32_t>(i)] = reflecting[i];
     }
 
-    stlout.open(std::to_string(id) + "_reflection.stl", std::ofstream::trunc);
-    
-    stlout << "solid " << std::to_string(id) << std::endl;
-    stlout << ss.rdbuf();
-    stlout << "endsolid " << std::to_string(id) << std::endl;
-    
-    stlout.close();
+    reflecting_mesh.exportSTL(std::to_string(id) + "_reflection.stl");
 }
 
 bool sortBestToWorst (Specimen* a, Specimen* b) { return (a->fitness > b->fitness); }
