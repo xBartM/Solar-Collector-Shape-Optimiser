@@ -7,7 +7,7 @@
 //#include <chrono>
 
 
-#include <Solar-Collector-Shape-Optimiser/specimen.hpp>
+#include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
 using namespace std;
 
@@ -52,11 +52,11 @@ int main (int argc, char** argv)
     obs.moveXY((xsize-1)/2, (hmax-1)/2);
     //obs.exportSTL("my_obstacle.stl");
 
-    // vector<Specimen*> seed;//(0, xsize, ysize, hmax, &obs);
+    // vector<SolarCollector*> seed;//(0, xsize, ysize, hmax, &obs);
     // // cout << "hmax";
     // for (int i = 0; i < 12; i++)
     // {
-    //     seed.push_back(new Specimen(rand_id(mt), xsize, ysize, hmax, &obs));
+    //     seed.push_back(new SolarCollector(rand_id(mt), xsize, ysize, hmax, &obs));
     //     // cout << ";S" << to_string(i);
     // }
     // cout << endl;
@@ -76,7 +76,7 @@ int main (int argc, char** argv)
 
     //     cout << to_string(i);
     //     for (auto pop = seed.begin(); pop != seed.end(); pop++)
-    //         cout << ";" << to_string((*pop)->fitness);
+    //         cout << ";" << to_string((*pop)->genes.fitness);
     //     cout << endl;
 
     // }
@@ -85,18 +85,18 @@ int main (int argc, char** argv)
     // return 0;
 
     // start = chrono::high_resolution_clock::now();
-    vector<Specimen*> population;
+    vector<SolarCollector*> population;
     for (int i = 0, j = 0; i < popsize; i++, j++)
     {
-        population.push_back(new Specimen(rand_id(mt), xsize, ysize, hmax, &obs));
+        population.push_back(new SolarCollector(rand_id(mt), xsize, ysize, hmax, &obs));
         for (int k = 0; k < xsize*ysize; k++)
             population[i]->setXY(k, 0, dist(mt));
         population[i]->computeMesh();
         population[i]->computeMeshMidpoints();
         // population[i].computeFitness(&ray, 1);
-        // if(population[i].fitness < 1000)
+        // if(population[i].genes.fitness < 1000)
         // {
-        //     cout << to_string(j) << "th try; fitness found: " << to_string(population[i].fitness) << endl;
+        //     cout << to_string(j) << "th try; fitness found: " << to_string(population[i].genes.fitness) << endl;
         //     population.pop_back();
         //     i--;
         // }
@@ -121,7 +121,7 @@ int main (int argc, char** argv)
         // start = chrono::high_resolution_clock::now();
         #pragma omp parallel for num_threads(4)
         for (auto pop = population.rbegin(); pop != population.rend(); pop++)
-            if ((*pop)->fitness == 0)
+            if ((*pop)->genes.fitness == 0)
                 (*pop)->computeFitness(&ray, 1);
                 // else cout << "skipped" << endl;
             // pop.exportReflectionsAsSTL(); // ??
@@ -132,7 +132,7 @@ int main (int argc, char** argv)
 
         cout << to_string(generation);
         for (auto pop = population.begin(); pop != population.end(); pop++)
-            cout << ";" << to_string((*pop)->fitness);
+            cout << ";" << to_string((*pop)->genes.fitness);
         cout << endl;
 
         // start = chrono::high_resolution_clock::now();
