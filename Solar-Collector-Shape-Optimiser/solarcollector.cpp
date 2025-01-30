@@ -283,37 +283,37 @@ void SolarCollector::exportReflectionAsSTL() {
 }
 
 // Changed parameters and body to reflect new inheritance hierarchy
-SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, uint32_t id, double crossover_bias, int mutation_percent)
-{
-    SolarCollector* temp = new SolarCollector(id, a.xsize, a.ysize, a.hmax, a.obstacle);
+// SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, uint32_t id, double crossover_bias, int mutation_percent)
+// {
+//     SolarCollector* temp = new SolarCollector(id, a.xsize, a.ysize, a.hmax, a.obstacle);
 
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_real_distribution<double> height(-0.225, 0.225);
-    std::uniform_real_distribution<double> diceroll(0.0, (double)100.0);
+//     std::random_device rd;
+//     std::mt19937 mt(rd());
+//     std::uniform_real_distribution<double> height(-0.225, 0.225);
+//     std::uniform_real_distribution<double> diceroll(0.0, (double)100.0);
 
-    for (int i = 0; i < a.xsize*a.ysize; i++)
-    {
-        if (diceroll(mt) < crossover_bias)  // take first
-        {
-            if (diceroll(mt) < mutation_percent)
-                temp->setXY(i, 0, a.getXY(i, 0) + height(mt));  // mutate 
-            else 
-                temp->setXY(i, 0, a.getXY(i, 0));               // take first (no mutation)
-        }
-        else    // take second
-        {
-            if (diceroll(mt) < mutation_percent)
-                temp->setXY(i, 0, b.getXY(i, 0) + height(mt));  // mutate second
-            else
-                temp->setXY(i, 0, b.getXY(i, 0));               // take second (no mutation)
-        }
+//     for (int i = 0; i < a.xsize*a.ysize; i++)
+//     {
+//         if (diceroll(mt) < crossover_bias)  // take first
+//         {
+//             if (diceroll(mt) < mutation_percent)
+//                 temp->setXY(i, 0, a.getXY(i, 0) + height(mt));  // mutate 
+//             else 
+//                 temp->setXY(i, 0, a.getXY(i, 0));               // take first (no mutation)
+//         }
+//         else    // take second
+//         {
+//             if (diceroll(mt) < mutation_percent)
+//                 temp->setXY(i, 0, b.getXY(i, 0) + height(mt));  // mutate second
+//             else
+//                 temp->setXY(i, 0, b.getXY(i, 0));               // take second (no mutation)
+//         }
         
-    }
-    temp->computeMesh();
-    temp->computeMeshMidpoints();
+//     }
+//     temp->computeMesh();
+//     temp->computeMeshMidpoints();
 
-    SolarCollector ret(*temp);
-    delete temp;
-    return ret;
-}
+//     SolarCollector ret(*temp);
+//     delete temp;
+//     return ret;
+// }

@@ -52,8 +52,33 @@ Genome& Genome::operator= (const Genome & other)
     return *this;
 }
 
-Genome::~Genome() {
-    // No need to manually delete as std::vector handles its own memory.
+Genome::~Genome() {}
+
+Genome Genome::crossoverAndMutate(const Genome &other, uint32_t new_id, double crossover_bias, int mutation_percent, double mutation_range) const {
+    Genome offspring(new_id, chromosome_size);
+
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<double> mutation_dist(-mutation_range, mutation_range);
+    std::uniform_real_distribution<double> crossover_dist(0.0, 100.0);
+
+    for (size_t i = 0; i < chromosome_size; ++i) {
+        if (crossover_dist(mt) < crossover_bias) {
+            if (mutation_percent > 0 && crossover_dist(mt) < mutation_percent) {
+                offspring.dna[i] = dna[i] + mutation_dist(mt);
+            } else {
+                offspring.dna[i] = dna[i];
+            }
+        } else {
+            if (mutation_percent > 0 && crossover_dist(mt) < mutation_percent) {
+                offspring.dna[i] = other.dna[i] + mutation_dist(mt);
+            } else {
+                offspring.dna[i] = other.dna[i];
+            }
+        }
+    }
+
+    return offspring;
 }
 
 std::ostream& operator<<(std::ostream& os, const Genome& genome) {

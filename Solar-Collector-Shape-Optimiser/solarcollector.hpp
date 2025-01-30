@@ -24,10 +24,8 @@ public:
     SolarCollector (SolarCollector&& other) noexcept;
     SolarCollector& operator= (SolarCollector&& other) noexcept;
     SolarCollector& operator= (const SolarCollector & other);
-    // Removed spaceship operator, because it is inherited
     ~SolarCollector();
 
-    // getXY and setXY moved to Genome, because they are now accessing the member of the parent class
     double getXY(const unsigned short x, const unsigned short y) const;
     void setXY(const unsigned short x, const unsigned short y, const double val);
     void showYourself();
@@ -41,7 +39,6 @@ public:
     void exportReflectionAsSTL();
 };
 
-// Changed parameters
-SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, uint32_t id, double crossover_bias, int mutation_percent);
+// SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, uint32_t id, double crossover_bias, int mutation_percent);
 
 #endif // SOLARCOLLECTOR_HPP

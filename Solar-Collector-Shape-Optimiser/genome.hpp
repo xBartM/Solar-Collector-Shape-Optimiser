@@ -1,6 +1,9 @@
 #ifndef GENOME_HPP
 #define GENOME_HPP
 
+#include <cstdint>
+#include <vector>
+#include <random>
 
 class Genome {
 public:
@@ -12,17 +15,20 @@ public:
     double fitness; // fitness of this set of chromosomes (% of triangles that reflected the light)
 
 
-    Genome (const uint32_t id, const uint32_t chromosome_size);
-    Genome (const Genome & other);
-    Genome (Genome&& other) noexcept;
-    Genome& operator= (Genome&& other) noexcept;
-    Genome& operator= (const Genome & other);
-    auto operator<=>(const Genome& other) const { return std::compare_three_way{}(fitness, other.fitness); }
-    ~Genome();
+    Genome(const uint32_t id, const uint32_t chromosome_size);
+    Genome(const Genome &other);
+    Genome(Genome &&other) noexcept;
+    Genome &operator=(Genome &&other) noexcept;
+    Genome &operator=(const Genome &other);
+    auto operator<=>(const Genome &other) const { return std::compare_three_way{}(fitness, other.fitness); }
+    virtual ~Genome();
 
     // double getXY(const unsigned short x, const unsigned short y) const;
     // void setXY(const unsigned short x, const unsigned short y, const double val);
     // void showYourself(); // Removed: SolarCollector has its own version
+
+    // Function to perform crossover and mutation between two Genomes
+    Genome crossoverAndMutate(const Genome &other, uint32_t new_id, double crossover_bias, int mutation_percent, double mutation_range) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Genome& genome);
 

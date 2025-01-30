@@ -152,7 +152,20 @@ int main (int argc, char** argv)
         for (auto pop = population.begin(); population.size() < popsize; pop++)
         {
             // this could be offspring constructor xDD
-            population.push_back(crossoverAndMutate(*pop, *(pop+1), rand_id(mt), 60, 5));
+            // population.push_back(crossoverAndMutate(*pop, *(pop+1), rand_id(mt), 60, 5));
+
+            // Use the crossoverAndMutate method from the Genome class
+            auto offspring = pop->crossoverAndMutate(*(pop + 1), rand_id(mt), 60, 5, 0.225);
+
+            // Convert Genome to SolarCollector (assuming constructor compatibility)
+            SolarCollector child(offspring.id, xsize, ysize, hmax, &obs);
+            child.dna = offspring.dna;
+
+            child.computeMesh();
+            child.computeMeshMidpoints();
+
+            population.push_back(std::move(child));
+  
         }
         // end = chrono::high_resolution_clock::now();
         // deltatime = end - start;
