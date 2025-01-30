@@ -85,11 +85,12 @@ int main (int argc, char** argv)
     // return 0;
 
     // start = chrono::high_resolution_clock::now();
+    vector<Genome> gene_pool;
     vector<SolarCollector> population;
     population.reserve(popsize); // reserve space to avoid reallocations
     for (int i = 0, j = 0; i < popsize; i++, j++)
     {
-        population.emplace_back(rand_id(mt), xsize, ysize, hmax, &obs);
+        population.emplace_back(xsize, ysize, hmax, &obs);
         for (int k = 0; k < xsize*ysize; k++)
             population[i].setXY(k, 0, dist(mt));
         population[i].computeMesh();
@@ -155,10 +156,10 @@ int main (int argc, char** argv)
             // population.push_back(crossoverAndMutate(*pop, *(pop+1), rand_id(mt), 60, 5));
 
             // Use the crossoverAndMutate method from the Genome class
-            auto offspring = pop->crossoverAndMutate(*(pop + 1), rand_id(mt), 60, 5, 0.225);
+            auto offspring = pop->crossoverAndMutate(*(pop + 1), 60, 5, 0.225);
 
             // Convert Genome to SolarCollector (assuming constructor compatibility)
-            SolarCollector child(offspring.id, xsize, ysize, hmax, &obs);
+            SolarCollector child(xsize, ysize, hmax, &obs);
             child.dna = offspring.dna;
 
             child.computeMesh();

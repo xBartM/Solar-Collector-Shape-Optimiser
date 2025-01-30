@@ -19,7 +19,7 @@ public:
     Mesh3d* obstacle; // pointer to obstacle to read its mesh
 
 
-    SolarCollector (const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs);
+    SolarCollector (const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs);
     SolarCollector (const SolarCollector & other);
     SolarCollector (SolarCollector&& other) noexcept;
     SolarCollector& operator= (SolarCollector&& other) noexcept;

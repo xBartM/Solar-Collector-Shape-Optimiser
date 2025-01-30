@@ -8,8 +8,8 @@
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
 // Changed constructor to initialize the base Genome class
-SolarCollector::SolarCollector(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs)
-    : Genome(num, (xs-1)*(ys-1)*2), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
+SolarCollector::SolarCollector(const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs)
+    : Genome((xs-1)*(ys-1)*2), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
     mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
 
 }

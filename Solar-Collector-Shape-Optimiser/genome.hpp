@@ -10,12 +10,12 @@ public:
     uint32_t id;   // unique identifier for a set of chromosomes in this Genome (form 0 to a-lot)
 
     // add age, max age and "immortal" elites
-    uint32_t chromosome_size; // number of chromosomes - size of dna vector
+    uint32_t dna_size; // number of chromosomes - size of dna vector
     std::vector<double> dna; // 1-d array of doubles (maybe type <T>?) that hold the instruction to create inheriting object
     double fitness; // fitness of this set of chromosomes (% of triangles that reflected the light)
 
 
-    Genome(const uint32_t id, const uint32_t chromosome_size);
+    Genome(const uint32_t dna_size);
     Genome(const Genome &other);
     Genome(Genome &&other) noexcept;
     Genome &operator=(Genome &&other) noexcept;
@@ -28,9 +28,12 @@ public:
     // void showYourself(); // Removed: SolarCollector has its own version
 
     // Function to perform crossover and mutation between two Genomes
-    Genome crossoverAndMutate(const Genome &other, uint32_t new_id, double crossover_bias, int mutation_percent, double mutation_range) const;
+    Genome crossoverAndMutate(const Genome &other, double crossover_bias, int mutation_percent, double mutation_range) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Genome& genome);
+
+private:
+    static uint32_t next_id;
 
 };
 
