@@ -76,7 +76,7 @@ int main (int argc, char** argv)
 
     //     cout << to_string(i);
     //     for (auto pop = seed.begin(); pop != seed.end(); pop++)
-    //         cout << ";" << to_string((*pop)->genes.fitness);
+    //         cout << ";" << to_string((*pop)->fitness);
     //     cout << endl;
 
     // }
@@ -95,9 +95,9 @@ int main (int argc, char** argv)
         population[i].computeMesh();
         population[i].computeMeshMidpoints();
         // population[i].computeFitness(&ray, 1);
-        // if(population[i].genes.fitness < 1000)
+        // if(population[i].fitness < 1000)
         // {
-        //     cout << to_string(j) << "th try; fitness found: " << to_string(population[i].genes.fitness) << endl;
+        //     cout << to_string(j) << "th try; fitness found: " << to_string(population[i].fitness) << endl;
         //     population.pop_back();
         //     i--;
         // }
@@ -122,18 +122,18 @@ int main (int argc, char** argv)
         // start = chrono::high_resolution_clock::now();
         #pragma omp parallel for num_threads(4)
         for (auto pop = population.rbegin(); pop != population.rend(); pop++)
-            if (pop->genes.fitness == 0)
+            if (pop->fitness == 0)
                 pop->computeFitness(&ray, 1);
                 // else cout << "skipped" << endl;
             // pop.exportReflectionsAsSTL(); // ??
         // end = chrono::high_resolution_clock::now();
         // deltatime = end - start;
         // std::cout << "Computing fitness: " << deltatime.count() << " s\n";
-        sort(population.begin(), population.end()); // WRONG WAY (but it works) // sorted best to worst
+        sort(population.begin(), population.end()); // WRONG WAY (but it works - i think even better.. 2gen max 15k...) // sorted best to worst
 
         cout << to_string(generation);
         for (auto pop = population.begin(); pop != population.end(); pop++)
-            cout << ";" << to_string(pop->genes.fitness);
+            cout << ";" << to_string(pop->fitness);
         cout << endl;
 
         // start = chrono::high_resolution_clock::now();
