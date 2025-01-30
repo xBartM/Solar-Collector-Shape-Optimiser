@@ -88,16 +88,16 @@ SolarCollector::~SolarCollector() {
 }
 
 double SolarCollector::getXY(const unsigned short x, const unsigned short y) const {
-    return genes.dna[y * xsize + x];
+    return dna[y * xsize + x];
 }
 
 void SolarCollector::setXY(const unsigned short x, const unsigned short y, const double val) {
     if (val < 0)
-        genes.dna[y * xsize + x] = 0;
+        dna[y * xsize + x] = 0;
     else if (val > hmax)
-        genes.dna[y * xsize + x] = hmax;
+        dna[y * xsize + x] = hmax;
     else
-        genes.dna[y * xsize + x] = val;
+        dna[y * xsize + x] = val;
 }
 
 void SolarCollector::showYourself() {
