@@ -28,7 +28,7 @@ public:
     // void showYourself(); // Removed: SolarCollector has its own version
 
     // Function to perform crossover and mutation between two Genomes
-    Genome crossoverAndMutate(const Genome &other, double crossover_bias, int mutation_percent, double mutation_range) const;
+    Genome crossoverAndMutate(const Genome &other, double crossover_bias, double mutation_percent, double mutation_range) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Genome& genome);
 

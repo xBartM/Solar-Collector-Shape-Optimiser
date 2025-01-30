@@ -8,7 +8,7 @@
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
 // Changed constructor to initialize the base Genome class
-SolarCollector::SolarCollector(const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs)
+SolarCollector::SolarCollector(const uint32_t xs, const uint32_t ys, const uint32_t hm, Mesh3d* obs)
     : Genome((xs-1)*(ys-1)*2), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
     mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
 
@@ -86,11 +86,11 @@ SolarCollector::~SolarCollector() {
     delete[] mesh_midpoints;
 }
 
-double SolarCollector::getXY(const unsigned short x, const unsigned short y) const {
+double SolarCollector::getXY(const uint32_t x, const uint32_t y) const {
     return dna[y * xsize + x];
 }
 
-void SolarCollector::setXY(const unsigned short x, const unsigned short y, const double val) {
+void SolarCollector::setXY(const uint32_t x, const uint32_t y, const double val) {
     if (val < 0)
         dna[y * xsize + x] = 0;
     else if (val > hmax)
@@ -100,9 +100,9 @@ void SolarCollector::setXY(const unsigned short x, const unsigned short y, const
 }
 
 void SolarCollector::showYourself() {
-    std::cout << (int)id << " " << xsize << " " << ysize << std::endl;
-    for (int y = 0; y < ysize; y++) {
-        for (int x = 0; x < xsize; x++)
+    std::cout << id << " " << xsize << " " << ysize << std::endl;
+    for (uint32_t y = 0; y < ysize; y++) {
+        for (uint32_t x = 0; x < xsize; x++)
             std::cout << getXY(x, y) << " ";
         std::cout << std::endl;
     }
@@ -203,9 +203,9 @@ bool SolarCollector::rayMeetsObstacle(const vertex& source, const vertex& ray, c
 }
 
 void SolarCollector::computeMesh() {
-    int i = 0;
-    for (int y = 0; y < ysize - 1; y++) {
-        for (int x = 0; x < xsize - 1; x++) {
+    uint32_t i = 0;
+    for (uint32_t y = 0; y < ysize - 1; y++) {
+        for (uint32_t x = 0; x < xsize - 1; x++) {
             shape_mesh[i].v[0].x = x;     shape_mesh[i].v[0].z = y;     shape_mesh[i].v[0].y = getXY(x, y);   // swapped coordinates
             shape_mesh[i].v[1].x = x;     shape_mesh[i].v[1].z = y + 1; shape_mesh[i].v[1].y = getXY(x, y + 1);
             shape_mesh[i].v[2].x = x + 1; shape_mesh[i].v[2].z = y;     shape_mesh[i].v[2].y = getXY(x + 1, y);
@@ -226,13 +226,13 @@ void SolarCollector::computeMeshMidpoints() {
         mesh_midpoints[i] = tMidPoint(shape_mesh[i]);
 }
 
-void SolarCollector::computeFitness(const vertex* rays, const int count_rays) {
+void SolarCollector::computeFitness(const vertex* rays, const uint32_t count_rays) {
     bool blocked = false;
     vertex reflection;
     
     fitness = 0;
 
-    for (int rayno = 0; rayno < count_rays; rayno++)
+    for (uint32_t rayno = 0; rayno < count_rays; rayno++)
     {
         // main (per ray) loop
         for (uint32_t trino = 0; trino < shape_mesh.triangle_count; trino++)

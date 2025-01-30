@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler flags (added -I for include directory)
-CXXFLAGS = -std=c++23 -Wall -Wextra -fopenmp -I.
+CXXFLAGS = -std=c++23 -Wall -Wextra -pedantic -fopenmp -I.
 # Use '-g' to generate debug information, or '-O3' for optimization
 # CXXFLAGS += -g
 CXXFLAGS += -O3

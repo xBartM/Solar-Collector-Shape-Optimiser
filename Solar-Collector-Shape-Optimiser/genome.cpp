@@ -55,23 +55,24 @@ Genome& Genome::operator= (const Genome & other)
 
 Genome::~Genome() {}
 
-Genome Genome::crossoverAndMutate(const Genome &other, double crossover_bias, int mutation_percent, double mutation_range) const {
+Genome Genome::crossoverAndMutate(const Genome &other, double crossover_bias, double mutation_percent, double mutation_range) const {
     Genome offspring(dna_size);
 
     std::random_device rd;
     std::mt19937 mt(rd());
-    std::uniform_real_distribution<double> mutation_dist(-mutation_range, mutation_range);
+    std::uniform_real_distribution<double> mutation_dist(-mutation_range, mutation_range); // how much to add/remove from dna point
     std::uniform_real_distribution<double> crossover_dist(0.0, 100.0);
+    std::uniform_real_distribution<double> mutation_chance_dist(0.0, 100.0); // added for comparing with mutation_percent
 
-    for (size_t i = 0; i < dna_size; ++i) {
+    for (uint32_t i = 0; i < dna_size; ++i) {
         if (crossover_dist(mt) < crossover_bias) {
-            if (mutation_percent > 0 && crossover_dist(mt) < mutation_percent) {
+            if (mutation_percent > 0 && mutation_chance_dist(mt) < mutation_percent) { // changed comparison to use mutation_chance_dist
                 offspring.dna[i] = dna[i] + mutation_dist(mt);
             } else {
                 offspring.dna[i] = dna[i];
             }
         } else {
-            if (mutation_percent > 0 && crossover_dist(mt) < mutation_percent) {
+            if (mutation_percent > 0 && mutation_chance_dist(mt) < mutation_percent) { // changed comparison to use mutation_chance_dist
                 offspring.dna[i] = other.dna[i] + mutation_dist(mt);
             } else {
                 offspring.dna[i] = other.dna[i];

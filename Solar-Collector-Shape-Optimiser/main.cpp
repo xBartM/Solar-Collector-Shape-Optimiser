@@ -17,15 +17,15 @@ int main (int argc, char** argv)
     // auto end = chrono::high_resolution_clock::now();
     // std::chrono::duration<double> deltatime = end - start;
 
-    ushort xsize;   // size of the panel (in mm preferably?)
-    ushort ysize;   // -||-
-    ushort hmax;    // max height of a panel
+    uint32_t xsize;   // size of the panel (in mm preferably?)
+    uint32_t ysize;   // -||-
+    uint32_t hmax;    // max height of a panel
 
     vertex ray(0, -1, 0);
 
-    ushort popsize; // size of the population
+    uint32_t popsize; // size of the population
 
-    ushort generation = 1;  // number of current generation
+    uint32_t generation = 1;  // number of current generation
 
     // +1 because, ex.: xsize, ysize = 2, 2 gives 2 triangles/1 square with a side of length 1mm
     if (argc == 5) {
@@ -44,7 +44,6 @@ int main (int argc, char** argv)
     mt19937 mt(rd());
     // uniform_real_distribution<double> dist(0.0, (double)hmax/10.0);
     uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
-    uniform_int_distribution<uint32_t> rand_id(0, numeric_limits<uint32_t>::max());
 
     //std::cout << dist(mt) << "\n";
 
@@ -54,9 +53,9 @@ int main (int argc, char** argv)
 
     // vector<SolarCollector*> seed;//(0, xsize, ysize, hmax, &obs);
     // // cout << "hmax";
-    // for (int i = 0; i < 12; i++)
+    // for (uint32_t i = 0; i < 12; i++)
     // {
-    //     seed.push_back(new SolarCollector(rand_id(mt), xsize, ysize, hmax, &obs));
+    //     seed.push_back(new SolarCollector(xsize, ysize, hmax, &obs));
     //     // cout << ";S" << to_string(i);
     // }
     // cout << endl;
@@ -67,7 +66,7 @@ int main (int argc, char** argv)
     //     #pragma omp parallel for num_threads(4)
     //     for (auto pop = seed.begin(); pop != seed.end(); pop++)
     //     {
-    //         for (int j = 0; j < xsize*ysize; j++)
+    //         for (uint32_t j = 0; j < xsize*ysize; j++)
     //             (*pop)->setXY(j, 0, dist(mt)*(i/(double)hmax));
     //         (*pop)->computeMesh();
     //         (*pop)->computeMeshMidpoints();
@@ -85,13 +84,13 @@ int main (int argc, char** argv)
     // return 0;
 
     // start = chrono::high_resolution_clock::now();
-    vector<Genome> gene_pool;
+    // vector<Genome> gene_pool;
     vector<SolarCollector> population;
     population.reserve(popsize); // reserve space to avoid reallocations
-    for (int i = 0, j = 0; i < popsize; i++, j++)
+    for (uint32_t i = 0, j = 0; i < popsize; i++, j++)
     {
         population.emplace_back(xsize, ysize, hmax, &obs);
-        for (int k = 0; k < xsize*ysize; k++)
+        for (uint32_t k = 0; k < xsize*ysize; k++)
             population[i].setXY(k, 0, dist(mt));
         population[i].computeMesh();
         population[i].computeMeshMidpoints();
@@ -115,7 +114,7 @@ int main (int argc, char** argv)
     // std::cout << "Setting up population: " << deltatime.count() << " s\n";
 
     cout << "Gen";
-    for (int i = 0; i < popsize; i++)
+    for (uint32_t i = 0; i < popsize; i++)
         cout << ";F" << to_string(i);
     cout << endl;
     while (true)
@@ -139,7 +138,7 @@ int main (int argc, char** argv)
         cout << endl;
 
         // start = chrono::high_resolution_clock::now();
-        for (int i = 0; i < popsize/3 ; i++)    // remove the weak
+        for (uint32_t i = 0; i < popsize/3 ; i++)    // remove the weak
         {
             // delete population.back();
             population.pop_back();
@@ -153,10 +152,10 @@ int main (int argc, char** argv)
         for (auto pop = population.begin(); population.size() < popsize; pop++)
         {
             // this could be offspring constructor xDD
-            // population.push_back(crossoverAndMutate(*pop, *(pop+1), rand_id(mt), 60, 5));
+            // population.push_back(crossoverAndMutate(*pop, *(pop+1), 60, 5));
 
             // Use the crossoverAndMutate method from the Genome class
-            auto offspring = pop->crossoverAndMutate(*(pop + 1), 60, 5, 0.225);
+            auto offspring = pop->crossoverAndMutate(*(pop + 1), 60, 5.0, 0.225);
 
             // Convert Genome to SolarCollector (assuming constructor compatibility)
             SolarCollector child(xsize, ysize, hmax, &obs);
