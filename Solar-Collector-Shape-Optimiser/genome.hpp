@@ -7,7 +7,8 @@ public:
     uint32_t id;   // unique identifier for a set of chromosomes in this Genome (form 0 to a-lot)
 
     uint32_t chromosome_size; // number of chromosomes
-    double* shape;  // table for heights at x and y coordinates -- access via (getter, but..) [y*xsize+x] -- this is chromosome
+    // double* shape;  // table for heights at x and y coordinates -- access via (getter, but..) [y*xsize+x] -- this is chromosome
+    std::vector<double> dna; // 1-d array of doubles (maybe type <T>?) that hold the instruction to create inheriting object
     double fitness; // fitness of this set of chromosomes (% of triangles that reflected the light)
 
 

@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <algorithm>
+#include <vector>
 // #include <compare>
 
 
@@ -8,36 +9,34 @@
 
 Genome::Genome(const uint32_t id, const uint32_t chromosome_size)
     : id(id), chromosome_size(chromosome_size) { 
-    shape = new double[chromosome_size];
+    dna.resize(chromosome_size);
     fitness = 0;
 }
 
 Genome::Genome (const Genome & other)
     : id(other.id), chromosome_size(other.chromosome_size), fitness(other.fitness) {
-    shape = new double[other.chromosome_size];
-    std::copy(other.shape, other.shape + other.chromosome_size, shape);    
+    dna.resize(other.chromosome_size);
+    std::copy(other.dna.begin(), other.dna.end(), dna.begin());    
 }
 
 Genome::Genome(Genome&& other) noexcept
     : id(std::move(other.id)),
       chromosome_size(std::move(other.chromosome_size)),
-      shape(other.shape),
+      dna(std::move(other.dna)),
       fitness(std::move(other.fitness))
 {
-    other.shape = nullptr;
     other.chromosome_size = 0; // set to some default value to avoid problems later
 }
 
 Genome& Genome::operator= (Genome&& other) noexcept {
     if (this != &other)
     {
-        delete[] shape;
+        dna.clear(); // or dna.resize(0); to release memory
         id = std::move(other.id);
         chromosome_size = std::move(other.chromosome_size);
         fitness = std::move(other.fitness);
-        shape = other.shape;
+        dna = std::move(other.dna);
 
-        other.shape = nullptr;
         other.chromosome_size = 0; // set to some default value to avoid problems later
     }
     return *this;
@@ -49,14 +48,14 @@ Genome& Genome::operator= (const Genome & other)
     chromosome_size = other.chromosome_size;
     fitness = other.fitness;
 
-    shape = new double[other.chromosome_size];
-    std::copy(other.shape, other.shape + other.chromosome_size, shape);
+    dna.resize(other.chromosome_size);
+    std::copy(other.dna.begin(), other.dna.end(), dna.begin());
     
     return *this;
 }
 
 Genome::~Genome() {
-    delete[] shape;
+    // No need to manually delete as std::vector handles its own memory.
 }
 
 // double Genome::getXY(const unsigned short x, const unsigned short y) const {

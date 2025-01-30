@@ -11,9 +11,6 @@ public:
     ushort ysize;
     ushort hmax;  // maximal height (dictated by max printing height)
 
-    Genome genes; // everything GA related
-    // double* shape;  // table for heights at x and y coordinates -- access via (getter, but..) [y*xsize+x] -- this is chromosome
-
     Mesh3d shape_mesh; // mesh calculated from 'shape' member
     vertex* mesh_midpoints; // precalculated mid points of every triangle of a mesh
 
