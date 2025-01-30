@@ -1,7 +1,5 @@
 #include <cstdint>
-#include <algorithm>
 #include <vector>
-// #include <compare>
 
 
 #include <Solar-Collector-Shape-Optimiser/genome.hpp>

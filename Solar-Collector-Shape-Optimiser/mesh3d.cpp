@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-// #include <string>
 
 #include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
 
