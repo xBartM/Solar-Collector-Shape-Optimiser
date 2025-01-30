@@ -7,14 +7,12 @@
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
-// Changed constructor to initialize the base Genome class
 SolarCollector::SolarCollector(const uint32_t xs, const uint32_t ys, const uint32_t hm, Mesh3d* obs)
     : Genome((xs-1)*(ys-1)*2), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
     mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
 
 }
 
-// Changed constructor to initialize the base Genome class
 SolarCollector::SolarCollector (const SolarCollector & other)
     : Genome(other), xsize(other.xsize), ysize(other.ysize), hmax(other.hmax), shape_mesh(other.shape_mesh) {
     obstacle = other.obstacle;
@@ -26,7 +24,6 @@ SolarCollector::SolarCollector (const SolarCollector & other)
     
 }
 
-// Changed constructor to initialize the base Genome class
 SolarCollector::SolarCollector (SolarCollector&& other) noexcept
     : Genome(std::move(other)),
       xsize(std::move(other.xsize)),
@@ -40,7 +37,6 @@ SolarCollector::SolarCollector (SolarCollector&& other) noexcept
     other.mesh_midpoints = nullptr;
 }
 
-// Changed assignment operators to properly handle the base Genome class
 SolarCollector& SolarCollector::operator= (SolarCollector&& other) noexcept {
     if (this != &other)
     {
@@ -60,15 +56,12 @@ SolarCollector& SolarCollector::operator= (SolarCollector&& other) noexcept {
     return *this;
 }
 
-// Changed assignment operators to properly handle the base Genome class
 SolarCollector& SolarCollector::operator= (const SolarCollector & other)
 {
     Genome::operator=(other); // Call the base class assignment operator
     xsize = other.xsize;
     ysize = other.ysize;
     hmax = other.hmax;
-
-    // genes = other.genes; // Removed
 
     obstacle = other.obstacle;
     reflecting = other.reflecting;
@@ -82,7 +75,6 @@ SolarCollector& SolarCollector::operator= (const SolarCollector & other)
 }
 
 SolarCollector::~SolarCollector() {
-    // delete[] shape; // Removed: now handled by Genome destructor
     delete[] mesh_midpoints;
 }
 
@@ -108,54 +100,7 @@ void SolarCollector::showYourself() {
     }
 }
 
-bool SolarCollector::rayIsBlocked(const vertex& source, const vertex& ray, const triangle& target) {
-    //Moller–Trumbore intersection algorithm
-
-    const vertex invray = substract(vertex(0,0,0), ray);    // while checking if ray is blocked it is sent from the reflecting triangle
-
-    //const vertex src_midpoint = tMidPoint(source);
-    const float EPSILON = 0.0000001;
-    const vertex vertex0 = target.v[0];
-    const vertex vertex1 = target.v[1];  
-    const vertex vertex2 = target.v[2];
-    const vertex edge1 = substract(vertex1, vertex0);
-    const vertex edge2 = substract(vertex2, vertex0); 
-    const vertex h = xProduct(invray, edge2);
-    vertex s, q;
-    const float a = dotProduct(edge1, h);
-    float f,u,v;
-
-    // edge1 = substract(vertex1, vertex0);
-    // edge2 = substract(vertex2, vertex0);
-    // h = xProduct(ray, edge2);
-    // a = dotProduct(edge1, h);
-    
-    if (a > -EPSILON && a < EPSILON)
-        return false;    // This ray is parallel to this triangle.
-    
-    f = 1.0/a;
-    s = substract(source, vertex0);
-    u = f * (dotProduct(s, h));
-    if (u < 0.0 || u > 1.0)
-        return false;
-
-    q = xProduct(s, edge1);
-    v = f * dotProduct(invray, q);
-    if (v < 0.0 || u + v > 1.0)
-        return false;
-
-    // At this stage we can compute t to find out where the intersection point is on the line.
-    float t = f * dotProduct(edge2, q);
-    if (t > EPSILON) // ray intersection
-    {
-        //outIntersectionPoint = rayOrigin + rayVector * t;
-        return true;
-    }
-    else // This means that there is a line intersection but not a ray intersection.
-        return false;
-}
-
-bool SolarCollector::rayMeetsObstacle(const vertex& source, const vertex& ray, const triangle& target) {
+bool SolarCollector::rayMeetsObstacle(const vertex& source, const vertex& ray, const triangle& target, bool invertRay) {
     //Moller–Trumbore intersection algorithm
 
     //const vertex invray = substract(vertex(0,0,0), ray);    // while checking if ray is blocked it is sent from the reflecting triangle
@@ -167,7 +112,10 @@ bool SolarCollector::rayMeetsObstacle(const vertex& source, const vertex& ray, c
     const vertex vertex2 = target.v[2];
     const vertex edge1 = substract(vertex1, vertex0);
     const vertex edge2 = substract(vertex2, vertex0); 
-    const vertex h = xProduct(ray, edge2);
+
+    const vertex usedRay = invertRay ? substract(vertex(0,0,0), ray) : ray; // Invert the ray if needed
+
+    const vertex h = xProduct(usedRay, edge2); // Use the potentially inverted ray
     vertex s, q;
     const float a = dotProduct(edge1, h);
     float f,u,v;
@@ -187,7 +135,7 @@ bool SolarCollector::rayMeetsObstacle(const vertex& source, const vertex& ray, c
         return false;
 
     q = xProduct(s, edge1);
-    v = f * dotProduct(ray, q);
+    v = f * dotProduct(usedRay, q); // Use the potentially inverted ray
     if (v < 0.0 || u + v > 1.0)
         return false;
 
@@ -242,7 +190,7 @@ void SolarCollector::computeFitness(const vertex* rays, const uint32_t count_ray
             for (uint32_t obsno = 0; obsno < obstacle->triangle_count; obsno++)
             {
                 // per obstacle triangle loop
-                if (rayIsBlocked(mesh_midpoints[trino], rays[rayno], obstacle->mesh[obsno])) ///  optimization potential (?) - collides(...,..., obstacle->mesh)
+                if (rayMeetsObstacle(mesh_midpoints[trino], rays[rayno], obstacle->mesh[obsno], true)) ///  optimization potential (?) - collides(...,..., obstacle->mesh)
                 { 
                     blocked = true; // if a ray to the triangle is blocked then stop checking
                     break;
@@ -256,7 +204,7 @@ void SolarCollector::computeFitness(const vertex* rays, const uint32_t count_ray
                 // std::cout << reflection.x << ' ' << reflection.y << ' ' << reflection.z << std::endl;
                 for (uint32_t obsno = 0; obsno < obstacle->triangle_count; obsno++)
                 {
-                    if(rayMeetsObstacle(mesh_midpoints[trino], reflection, obstacle->mesh[obsno]) == true)
+                    if(rayMeetsObstacle(mesh_midpoints[trino], reflection, obstacle->mesh[obsno], false) == true)
                     {
                         // reflecting.push_back(shape_mesh[trino]);
                         fitness +=  1;
@@ -281,39 +229,3 @@ void SolarCollector::exportReflectionAsSTL() {
 
     reflecting_mesh.exportSTL(std::to_string(id) + "_reflection.stl");
 }
-
-// Changed parameters and body to reflect new inheritance hierarchy
-// SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, uint32_t id, double crossover_bias, int mutation_percent)
-// {
-//     SolarCollector* temp = new SolarCollector(id, a.xsize, a.ysize, a.hmax, a.obstacle);
-
-//     std::random_device rd;
-//     std::mt19937 mt(rd());
-//     std::uniform_real_distribution<double> height(-0.225, 0.225);
-//     std::uniform_real_distribution<double> diceroll(0.0, (double)100.0);
-
-//     for (int i = 0; i < a.xsize*a.ysize; i++)
-//     {
-//         if (diceroll(mt) < crossover_bias)  // take first
-//         {
-//             if (diceroll(mt) < mutation_percent)
-//                 temp->setXY(i, 0, a.getXY(i, 0) + height(mt));  // mutate 
-//             else 
-//                 temp->setXY(i, 0, a.getXY(i, 0));               // take first (no mutation)
-//         }
-//         else    // take second
-//         {
-//             if (diceroll(mt) < mutation_percent)
-//                 temp->setXY(i, 0, b.getXY(i, 0) + height(mt));  // mutate second
-//             else
-//                 temp->setXY(i, 0, b.getXY(i, 0));               // take second (no mutation)
-//         }
-        
-//     }
-//     temp->computeMesh();
-//     temp->computeMeshMidpoints();
-
-//     SolarCollector ret(*temp);
-//     delete temp;
-//     return ret;
-// }

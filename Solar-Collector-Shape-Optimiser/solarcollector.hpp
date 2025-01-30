@@ -30,8 +30,9 @@ public:
     void setXY(const uint32_t x, const uint32_t y, const double val);
     void showYourself();
     
-    bool rayIsBlocked(const vertex& source, const vertex& ray, const triangle& target);
-    bool rayMeetsObstacle(const vertex& source, const vertex& ray, const triangle& target);
+    // when having a ray == (0, -1, 0) we can remove all the triangles that are not in the plane
+    // so when having a ray == (x, y, z) we can transform all the coordinates so that ray becomes (0, -1, 0) and the check for intersection is faster
+    bool rayMeetsObstacle(const vertex& source, const vertex& ray, const triangle& target, bool invertRay);
     void computeMesh();
     void computeMeshMidpoints();
     void computeFitness(const vertex* rays, const uint32_t count_rays);
@@ -39,6 +40,5 @@ public:
     void exportReflectionAsSTL();
 };
 
-// SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, uint32_t id, double crossover_bias, int mutation_percent);
 
 #endif // SOLARCOLLECTOR_HPP
