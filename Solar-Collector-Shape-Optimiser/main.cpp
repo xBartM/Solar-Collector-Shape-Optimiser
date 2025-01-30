@@ -155,7 +155,7 @@ int main (int argc, char** argv)
             // population.push_back(crossoverAndMutate(*pop, *(pop+1), 60, 5));
 
             // Use the crossoverAndMutate method from the Genome class
-            auto offspring = pop->crossoverAndMutate(*(pop + 1), 60, 5.0, 0.225);
+            auto offspring = pop->crossoverAndMutateSoA(*(pop + 1), 60.0, 5.0, 0.225);
 
             // Convert Genome to SolarCollector (assuming constructor compatibility)
             SolarCollector child(xsize, ysize, hmax, &obs);
