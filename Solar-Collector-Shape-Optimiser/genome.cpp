@@ -1,6 +1,6 @@
 #include <cstdint>
 #include <vector>
-
+#include <ostream>
 
 #include <Solar-Collector-Shape-Optimiser/genome.hpp>
 
@@ -56,18 +56,11 @@ Genome::~Genome() {
     // No need to manually delete as std::vector handles its own memory.
 }
 
-// double Genome::getXY(const unsigned short x, const unsigned short y) const {
-//     return shape[y * xsize + x];
-// }
+std::ostream& operator<<(std::ostream& os, const Genome& genome) {
+    os << "ID: " << genome.id << ", Chromosome Size: " << genome.chromosome_size << ", Fitness: " << genome.fitness;
+    return os;
+}
 
-// void Genome::setXY(const unsigned short x, const unsigned short y, const double val) {
-//     if (val < 0)
-//         shape[y * xsize + x] = 0;
-//     else if (val > hmax)
-//         shape[y * xsize + x] = hmax;
-//     else
-//         shape[y * xsize + x] = val;
-// }
 
 // void Genome::showYourself() {
 //     std::cout << (int)id << " " << xsize << " " << ysize << std::endl;

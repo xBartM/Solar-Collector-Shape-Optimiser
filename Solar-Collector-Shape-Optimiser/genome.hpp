@@ -7,7 +7,7 @@ public:
     uint32_t id;   // unique identifier for a set of chromosomes in this Genome (form 0 to a-lot)
 
     // add age, max age and "immortal" elites
-    uint32_t chromosome_size; // number of chromosomes
+    uint32_t chromosome_size; // number of chromosomes - size of dna vector
     std::vector<double> dna; // 1-d array of doubles (maybe type <T>?) that hold the instruction to create inheriting object
     double fitness; // fitness of this set of chromosomes (% of triangles that reflected the light)
 
@@ -24,7 +24,8 @@ public:
     // void setXY(const unsigned short x, const unsigned short y, const double val);
     // void showYourself(); // Removed: SolarCollector has its own version
 
-    
+    friend std::ostream& operator<<(std::ostream& os, const Genome& genome);
+
 };
 
 

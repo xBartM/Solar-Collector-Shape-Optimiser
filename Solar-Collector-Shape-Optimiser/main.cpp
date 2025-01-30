@@ -134,6 +134,7 @@ int main (int argc, char** argv)
         cout << to_string(generation);
         for (auto pop = population.begin(); pop != population.end(); pop++)
             cout << ";" << to_string(pop->fitness);
+            // cout << *pop << endl;
         cout << endl;
 
         // start = chrono::high_resolution_clock::now();
