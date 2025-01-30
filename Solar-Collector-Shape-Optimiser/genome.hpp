@@ -6,6 +6,7 @@ class Genome {
 public:
     uint32_t id;   // unique identifier for a set of chromosomes in this Genome (form 0 to a-lot)
 
+    // add age, max age and "immortal" elites
     uint32_t chromosome_size; // number of chromosomes
     // double* shape;  // table for heights at x and y coordinates -- access via (getter, but..) [y*xsize+x] -- this is chromosome
     std::vector<double> dna; // 1-d array of doubles (maybe type <T>?) that hold the instruction to create inheriting object
@@ -22,7 +23,8 @@ public:
 
     // double getXY(const unsigned short x, const unsigned short y) const;
     // void setXY(const unsigned short x, const unsigned short y, const double val);
-    // void showYourself();
+    // void showYourself(); // Removed: SolarCollector has its own version
+
     
 };
 

@@ -8,15 +8,16 @@
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
-
+// Changed constructor to initialize the base Genome class
 SolarCollector::SolarCollector(const unsigned char num, const unsigned short xs, const unsigned short ys, const unsigned short hm, Mesh3d* obs)
-    : xsize(xs), ysize(ys), hmax(hm), genes(num, (xs-1)*(ys-1)*2), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
+    : Genome(num, (xs-1)*(ys-1)*2), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
     mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
 
 }
 
+// Changed constructor to initialize the base Genome class
 SolarCollector::SolarCollector (const SolarCollector & other)
-    : xsize(other.xsize), ysize(other.ysize), hmax(other.hmax), genes(other.genes), shape_mesh(other.shape_mesh) {
+    : Genome(other), xsize(other.xsize), ysize(other.ysize), hmax(other.hmax), shape_mesh(other.shape_mesh) {
     obstacle = other.obstacle;
     reflecting = other.reflecting;
 
@@ -26,11 +27,12 @@ SolarCollector::SolarCollector (const SolarCollector & other)
     
 }
 
+// Changed constructor to initialize the base Genome class
 SolarCollector::SolarCollector (SolarCollector&& other) noexcept
-    : xsize(std::move(other.xsize)),
+    : Genome(std::move(other)),
+      xsize(std::move(other.xsize)),
       ysize(std::move(other.ysize)),
       hmax(std::move(other.hmax)),
-      genes(std::move(other.genes)),
       shape_mesh(std::move(other.shape_mesh)),
       mesh_midpoints(other.mesh_midpoints),
       reflecting(std::move(other.reflecting)),
@@ -39,13 +41,15 @@ SolarCollector::SolarCollector (SolarCollector&& other) noexcept
     other.mesh_midpoints = nullptr;
 }
 
+// Changed assignment operators to properly handle the base Genome class
 SolarCollector& SolarCollector::operator= (SolarCollector&& other) noexcept {
     if (this != &other)
     {
+        Genome::operator=(std::move(other)); // Call the base class assignment operator
         xsize = std::move(other.xsize);
         ysize = std::move(other.ysize);
         hmax = std::move(other.hmax);
-        genes = std::move(other.genes);
+        // genes = std::move(other.genes); // Removed
         shape_mesh = std::move(other.shape_mesh);
         reflecting = std::move(other.reflecting);
         obstacle = std::move(other.obstacle);
@@ -57,13 +61,15 @@ SolarCollector& SolarCollector::operator= (SolarCollector&& other) noexcept {
     return *this;
 }
 
+// Changed assignment operators to properly handle the base Genome class
 SolarCollector& SolarCollector::operator= (const SolarCollector & other)
 {
+    Genome::operator=(other); // Call the base class assignment operator
     xsize = other.xsize;
     ysize = other.ysize;
     hmax = other.hmax;
 
-    genes = other.genes;
+    // genes = other.genes; // Removed
 
     obstacle = other.obstacle;
     reflecting = other.reflecting;
@@ -77,7 +83,7 @@ SolarCollector& SolarCollector::operator= (const SolarCollector & other)
 }
 
 SolarCollector::~SolarCollector() {
-    // delete[] shape;
+    // delete[] shape; // Removed: now handled by Genome destructor
     delete[] mesh_midpoints;
 }
 
@@ -95,7 +101,7 @@ void SolarCollector::setXY(const unsigned short x, const unsigned short y, const
 }
 
 void SolarCollector::showYourself() {
-    std::cout << (int)genes.id << " " << xsize << " " << ysize << std::endl;
+    std::cout << (int)id << " " << xsize << " " << ysize << std::endl;
     for (int y = 0; y < ysize; y++) {
         for (int x = 0; x < xsize; x++)
             std::cout << getXY(x, y) << " ";
@@ -225,7 +231,7 @@ void SolarCollector::computeFitness(const vertex* rays, const int count_rays) {
     bool blocked = false;
     vertex reflection;
     
-    genes.fitness = 0;
+    fitness = 0;
 
     for (int rayno = 0; rayno < count_rays; rayno++)
     {
@@ -254,7 +260,7 @@ void SolarCollector::computeFitness(const vertex* rays, const int count_rays) {
                     if(rayMeetsObstacle(mesh_midpoints[trino], reflection, obstacle->mesh[obsno]) == true)
                     {
                         // reflecting.push_back(shape_mesh[trino]);
-                        genes.fitness +=  1;
+                        fitness +=  1;
                         break;
                     }
                 }
@@ -274,10 +280,11 @@ void SolarCollector::exportReflectionAsSTL() {
         reflecting_mesh[static_cast<uint32_t>(i)] = reflecting[i];
     }
 
-    reflecting_mesh.exportSTL(std::to_string(genes.id) + "_reflection.stl");
+    reflecting_mesh.exportSTL(std::to_string(id) + "_reflection.stl");
 }
 
-SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, int id, double crossover_bias, int mutation_percent)
+// Changed parameters and body to reflect new inheritance hierarchy
+SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, uint32_t id, double crossover_bias, int mutation_percent)
 {
     SolarCollector* temp = new SolarCollector(id, a.xsize, a.ysize, a.hmax, a.obstacle);
 

@@ -5,7 +5,7 @@
 #include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
 #include <Solar-Collector-Shape-Optimiser/genome.hpp>
 
-class SolarCollector {
+class SolarCollector : public Genome { // Inherits from Genome
 public:
     ushort xsize;   // size of the panel
     ushort ysize;
@@ -24,9 +24,10 @@ public:
     SolarCollector (SolarCollector&& other) noexcept;
     SolarCollector& operator= (SolarCollector&& other) noexcept;
     SolarCollector& operator= (const SolarCollector & other);
-    auto operator<=> (const SolarCollector& other) const { return genes <=> other.genes; } // Add spaceship operator for comparison
+    // Removed spaceship operator, because it is inherited
     ~SolarCollector();
 
+    // getXY and setXY moved to Genome, because they are now accessing the member of the parent class
     double getXY(const unsigned short x, const unsigned short y) const;
     void setXY(const unsigned short x, const unsigned short y, const double val);
     void showYourself();
@@ -40,8 +41,7 @@ public:
     void exportReflectionAsSTL();
 };
 
-// move both of those to Genes
-SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, int id, double crossover_bias, int mutation_percent);
-
+// Changed parameters
+SolarCollector crossoverAndMutate (SolarCollector & a, SolarCollector & b, uint32_t id, double crossover_bias, int mutation_percent);
 
 #endif // SOLARCOLLECTOR_HPP
