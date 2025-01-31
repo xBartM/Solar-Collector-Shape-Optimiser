@@ -4,10 +4,11 @@
 #include <vector>
 #include <algorithm>
 #include <random>
-//#include <chrono>
-
+#include <chrono>
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
+
+// #define MAIN_TIMED
 
 using namespace std;
 
@@ -15,9 +16,11 @@ void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint3
 
 int main (int argc, char** argv)
 {
+    // #ifdef MAIN_TIMED
     // auto start = chrono::high_resolution_clock::now();
     // auto end = chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> deltatime = end - start;
+    // chrono::duration<double> deltatime = end - start;
+    // #endif // MAIN_TIMED
 
     uint32_t xsize;   // size of the panel (in mm preferably?)
     uint32_t ysize;   // -||-
@@ -35,9 +38,9 @@ int main (int argc, char** argv)
         popsize = stoul(argv[4]);
     } else {
         xsize   = 180+1;    // size of printbed (minus some spare space)
-        ysize   = 940+1;    // length of aluminum rod
+        ysize   = 94+1;    // length of aluminum rod
         hmax    = 180+1;    // height of printbed (minus some spare space)
-        popsize = 8;       // make popsize divisible by 4 xd
+        popsize = 4;       // make popsize divisible by 4 xd
     }
 
     random_device rd;
@@ -48,7 +51,7 @@ int main (int argc, char** argv)
     obs.moveXY((xsize-1.0)/2.0, (hmax-1.0)/2.0);
     //obs.exportSTL("my_obstacle.stl");
 
-    findProperHmaxDist(xsize, ysize, hmax, &obs);
+    // findProperHmaxDist(xsize, ysize, hmax, &obs);
 
     // start = chrono::high_resolution_clock::now();
     // vector<Genome> gene_pool;
@@ -128,6 +131,7 @@ int main (int argc, char** argv)
         // cout << "crossovered" << endl;
 
         ++generation;
+        return 0;
     }
 
     return 0;

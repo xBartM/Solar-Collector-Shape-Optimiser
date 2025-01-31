@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 struct vertex {
     double x;
@@ -24,13 +25,12 @@ struct triangle {
 class Mesh3d {
 public:
     uint32_t triangle_count; // number of triangles in mesh
-    triangle* mesh; // mesh consisting of multiple triangles
-
+    std::vector<triangle> mesh; // mesh consisting of multiple triangles
 
     Mesh3d();
     Mesh3d(const uint32_t triangle_count);
     Mesh3d(const std::string filename);
-    Mesh3d (const Mesh3d & other); // copy constructor
+    Mesh3d (const Mesh3d& other); // copy constructor
     ~Mesh3d();
 
     triangle& operator[](const uint32_t index);

@@ -7,62 +7,38 @@
 
 Mesh3d::Mesh3d() {}
 
-Mesh3d::Mesh3d(const uint32_t triangle_count) 
-    : triangle_count(triangle_count) {
-
+Mesh3d::Mesh3d(const uint32_t triangle_count) : triangle_count(triangle_count) {
     // Allocate memory for the new mesh based on the copied triangle count
-    mesh = new triangle[triangle_count];
+    mesh.resize(triangle_count);
     
 }
 
 Mesh3d::Mesh3d(const std::string filename) { importSTL(filename); }
 
-Mesh3d::Mesh3d(const Mesh3d &other) 
-    : triangle_count(other.triangle_count) {
-   
-    // Allocate memory for the new mesh based on the copied triangle count
-    mesh = new triangle[other.triangle_count];
+Mesh3d::Mesh3d(const Mesh3d& other) : triangle_count(other.triangle_count), mesh(other.mesh) {}
 
-    // Deep copy each triangle
-    for (uint32_t i = 0; i < other.triangle_count; ++i) {
-        mesh[i] = other.mesh[i];
-    }
-}
-
-Mesh3d::~Mesh3d() { delete[] mesh; }
+Mesh3d::~Mesh3d() {}
 
 
 triangle& Mesh3d::operator[] (const uint32_t index) {
-    if (index >= triangle_count) {
-        throw std::out_of_range("Index out of bounds");
-    }
+    // if (index >= triangle_count) {
+    //     throw std::out_of_range("Index out of bounds");
+    // }
     return mesh[index];
 }
 
 Mesh3d& Mesh3d::operator= (const Mesh3d& other) {
     if (this != &other) { // Self-assignment check
-        // 1. Delete existing data
-        delete[] mesh;
-
-        // 2. Copy triangle count
-        triangle_count = other.triangle_count;
-
-        // 3. Allocate new memory
-        mesh = new triangle[triangle_count];
-
-        // 4. Deep copy triangles
-        for (uint32_t i = 0; i < triangle_count; ++i) {
-            mesh[i] = other.mesh[i];
-        }
+        mesh = other.mesh; // Use vector's assignment operator
     }
     return *this;
 }
 
 
 void Mesh3d::moveXY(const double x, const double y) {
-    for (uint32_t i = 0; i < triangle_count; i++) {
-        mesh[i].v[0].x += x; mesh[i].v[1].x += x; mesh[i].v[2].x += x;
-        mesh[i].v[0].y += y; mesh[i].v[1].y += y; mesh[i].v[2].y += y;
+    for (auto& t : mesh) {
+        t.v[0].x += x; t.v[1].x += x; t.v[2].x += x;
+        t.v[0].y += y; t.v[1].y += y; t.v[2].y += y;
     }
 }
 
@@ -77,7 +53,7 @@ void Mesh3d::importSTL(const std::string filename) {
         triangle_count -= 2;
         triangle_count /= 7;
 
-        mesh = new triangle[triangle_count];
+        mesh.resize(triangle_count);
 
         file.seekg(0, file.beg);    // return to beginning
         file.clear();               // clear flags (especially eof flag)
@@ -152,12 +128,12 @@ void Mesh3d::exportSTL(const std::string filename) {
     stlout.open(filename, std::ofstream::trunc);
     stlout << "solid Mesh3d" << std::endl;
 
-    for (uint32_t i = 0; i < triangle_count; i++) {
-        stlout << "facet normal " << mesh[i].normal.x << " " << mesh[i].normal.y << " " << mesh[i].normal.z << std::endl;
+    for (const auto& t : mesh) {
+        stlout << "facet normal " << t.normal.x << " " << t.normal.y << " " << t.normal.z << std::endl;
         stlout << "   outer loop" << std::endl;
-        stlout << "      vertex " << mesh[i].v[0].x << " " << mesh[i].v[0].y << " " << mesh[i].v[0].z << std::endl;
-        stlout << "      vertex " << mesh[i].v[1].x << " " << mesh[i].v[1].y << " " << mesh[i].v[1].z << std::endl;
-        stlout << "      vertex " << mesh[i].v[2].x << " " << mesh[i].v[2].y << " " << mesh[i].v[2].z << std::endl;
+        stlout << "      vertex " << t.v[0].x << " " << t.v[0].y << " " << t.v[0].z << std::endl;
+        stlout << "      vertex " << t.v[1].x << " " << t.v[1].y << " " << t.v[1].z << std::endl;
+        stlout << "      vertex " << t.v[2].x << " " << t.v[2].y << " " << t.v[2].z << std::endl;
         stlout << "   endloop" << std::endl;
         stlout << "endfacet" << std::endl;
     }
