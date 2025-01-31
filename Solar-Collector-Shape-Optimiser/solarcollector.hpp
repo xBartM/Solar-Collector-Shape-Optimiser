@@ -16,10 +16,10 @@ public:
 
     std::vector<triangle> reflecting; // I think it's for checking the shape of the mesh built only from triangles that reflect the ray directly onto the obstacle - it's an overkill to store all triangles, just store bools or something
 
-    Mesh3d* obstacle; // pointer to obstacle to read its mesh
+    const Mesh3d* obstacle; // pointer to obstacle to read its mesh
 
 
-    SolarCollector (const uint32_t xs, const uint32_t ys, const uint32_t hm, Mesh3d* obs);
+    SolarCollector (const uint32_t xs, const uint32_t ys, const uint32_t hm, const Mesh3d* obs);
     SolarCollector (const SolarCollector & other);
     SolarCollector (SolarCollector&& other) noexcept;
     SolarCollector& operator= (SolarCollector&& other) noexcept;

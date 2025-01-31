@@ -11,6 +11,8 @@
 
 using namespace std;
 
+void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint32_t hmax, const Mesh3d* obs);
+
 int main (int argc, char** argv)
 {
     // auto start = chrono::high_resolution_clock::now();
@@ -20,19 +22,17 @@ int main (int argc, char** argv)
     uint32_t xsize;   // size of the panel (in mm preferably?)
     uint32_t ysize;   // -||-
     uint32_t hmax;    // max height of a panel
-
-    vertex ray(0, -1, 0);
-
     uint32_t popsize; // size of the population
 
-    uint32_t generation = 1;  // number of current generation
+    uint32_t generation = 0;  // number of current generation
+    vertex ray(0, -1, 0);
 
     // +1 because, ex.: xsize, ysize = 2, 2 gives 2 triangles/1 square with a side of length 1mm
     if (argc == 5) {
-        xsize   = atoi(argv[1])+1;
-        ysize   = atoi(argv[2])+1;
-        hmax    = atoi(argv[3])+1;
-        popsize = atoi(argv[4]);
+        xsize   = stoul(argv[1])+1;
+        ysize   = stoul(argv[2])+1;
+        hmax    = stoul(argv[3])+1;
+        popsize = stoul(argv[4]);
     } else {
         xsize   = 180+1;    // size of printbed (minus some spare space)
         ysize   = 940+1;    // length of aluminum rod
@@ -42,71 +42,24 @@ int main (int argc, char** argv)
 
     random_device rd;
     mt19937 mt(rd());
-    // uniform_real_distribution<double> dist(0.0, (double)hmax/10.0);
     uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
 
-    //std::cout << dist(mt) << "\n";
-
     Mesh3d obs("obstacle.stl");
-    obs.moveXY((xsize-1)/2, (hmax-1)/2);
+    obs.moveXY((xsize-1.0)/2.0, (hmax-1.0)/2.0);
     //obs.exportSTL("my_obstacle.stl");
 
-    // vector<SolarCollector*> seed;//(0, xsize, ysize, hmax, &obs);
-    // // cout << "hmax";
-    // for (uint32_t i = 0; i < 12; i++)
-    // {
-    //     seed.push_back(new SolarCollector(xsize, ysize, hmax, &obs));
-    //     // cout << ";S" << to_string(i);
-    // }
-    // cout << endl;
-
-    // while (true)
-    // for (double i = 0.4; i <= 0.55; i+=0.0025)
-    // {
-    //     #pragma omp parallel for num_threads(4)
-    //     for (auto pop = seed.begin(); pop != seed.end(); pop++)
-    //     {
-    //         for (uint32_t j = 0; j < xsize*ysize; j++)
-    //             (*pop)->setXY(j, 0, dist(mt)*(i/(double)hmax));
-    //         (*pop)->computeMesh();
-    //         (*pop)->computeMeshMidpoints();
-    //         (*pop)->computeFitness(&ray, 1);
-    //     }
-
-    //     cout << to_string(i);
-    //     for (auto pop = seed.begin(); pop != seed.end(); pop++)
-    //         cout << ";" << to_string((*pop)->fitness);
-    //     cout << endl;
-
-    // }
-
-
-    // return 0;
+    findProperHmaxDist(xsize, ysize, hmax, &obs);
 
     // start = chrono::high_resolution_clock::now();
     // vector<Genome> gene_pool;
     vector<SolarCollector> population;
     population.reserve(popsize); // reserve space to avoid reallocations
-    for (uint32_t i = 0, j = 0; i < popsize; i++, j++)
-    {
+    for (uint32_t i = 0, j = 0; i < popsize; i++, j++) {
         population.emplace_back(xsize, ysize, hmax, &obs);
         for (uint32_t k = 0; k < xsize*ysize; k++)
             population[i].setXY(k, 0, dist(mt));
         population[i].computeMesh();
         population[i].computeMeshMidpoints();
-        // population[i].computeFitness(&ray, 1);
-        // if(population[i].fitness < 1000)
-        // {
-        //     cout << to_string(j) << "th try; fitness found: " << to_string(population[i].fitness) << endl;
-        //     population.pop_back();
-        //     i--;
-        // }
-        // else
-        // {
-        //     cout << to_string(i) << " out of " << to_string(popsize) << "; found after " << to_string(j) << " tries." << endl;
-        //     j = 0;
-        // }
-        // population[i].exportAsSTL();
 
     }
     // end = chrono::high_resolution_clock::now();
@@ -178,4 +131,45 @@ int main (int argc, char** argv)
     }
 
     return 0;
+}
+
+void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint32_t hmax, const Mesh3d* obs) {
+
+    constexpr uint32_t test_sample = 12;
+    constexpr uint32_t test_batches = 9;
+    vertex ray(0, -1, 0);
+
+    random_device rd;
+    mt19937 mt(rd());
+    uniform_real_distribution<double> dist(0.0, 1.0);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
+
+    vector<SolarCollector> seed;//(0, xsize, ysize, hmax, &obs);
+    seed.reserve(test_sample); // reserve space to avoid reallocations
+    cout << "hub"; // hmax upper bound
+    for (uint32_t i = 0; i < test_sample; ++i)
+    {
+        seed.emplace_back(xsize, ysize, hmax, obs);
+        cout << ";S" << to_string(i);
+    }
+    cout << endl;
+
+    for (double i = 0.0; i <= (double)hmax; i+=(double)hmax/(double)test_batches)//i+=0.0025)
+    {
+        #pragma omp parallel for num_threads(4)
+        for (auto pop = seed.begin(); pop != seed.end(); pop++)
+        {
+            for (uint32_t j = 0; j < xsize*ysize; j++)
+                pop->setXY(j, 0, dist(mt)*i);
+            pop->computeMesh();
+            pop->computeMeshMidpoints();
+            pop->computeFitness(&ray, 1);
+        }
+
+        cout << to_string(i);
+        for (auto pop = seed.begin(); pop != seed.end(); pop++)
+            cout << ";" << to_string(pop->fitness);
+        cout << endl;
+
+    }
+    exit(0);
 }

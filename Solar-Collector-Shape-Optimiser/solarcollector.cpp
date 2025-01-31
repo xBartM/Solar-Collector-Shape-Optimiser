@@ -7,7 +7,7 @@
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
-SolarCollector::SolarCollector(const uint32_t xs, const uint32_t ys, const uint32_t hm, Mesh3d* obs)
+SolarCollector::SolarCollector(const uint32_t xs, const uint32_t ys, const uint32_t hm, const Mesh3d* obs)
     : Genome((xs-1)*(ys-1)*2), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
     mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
 
