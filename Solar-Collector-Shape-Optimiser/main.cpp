@@ -4,7 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <random>
-#include <chrono>
+// #include <chrono>
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
@@ -62,7 +62,6 @@ int main (int argc, char** argv)
         for (uint32_t k = 0; k < xsize*ysize; k++)
             population[i].setXY(k, 0, dist(mt));
         population[i].computeMesh();
-        population[i].computeMeshMidpoints();
 
     }
     // end = chrono::high_resolution_clock::now();
@@ -118,7 +117,6 @@ int main (int argc, char** argv)
             child.dna = offspring.dna;
 
             child.computeMesh();
-            child.computeMeshMidpoints();
 
             population.push_back(std::move(child));
   
@@ -165,7 +163,6 @@ void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint3
             for (uint32_t j = 0; j < xsize*ysize; j++)
                 pop->setXY(j, 0, dist(mt)*i);
             pop->computeMesh();
-            pop->computeMeshMidpoints();
             pop->computeFitness(&ray, 1);
         }
 

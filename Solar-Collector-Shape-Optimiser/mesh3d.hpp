@@ -15,11 +15,12 @@ struct vertex {
 };
 
 struct triangle {
-    vertex normal;
-    vertex v[3];
+    vertex v[3]; // three points for vertices
+    vertex normal; // normal to the triangle
+    vertex midpoint; // midpoint of the triangle
 
-    triangle() : normal(), v{} {};
-    triangle(vertex n, vertex v1, vertex v2, vertex v3) : normal(n), v{v1, v2, v3} {};
+    triangle() : v{}, normal(), midpoint() {};
+    triangle(vertex v1, vertex v2, vertex v3, vertex n, vertex m) : v{v1, v2, v3}, normal(n), midpoint(m) {};
 };
 
 class Mesh3d {

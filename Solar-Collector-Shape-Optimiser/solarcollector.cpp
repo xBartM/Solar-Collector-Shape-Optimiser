@@ -9,7 +9,7 @@
 
 SolarCollector::SolarCollector(const uint32_t xs, const uint32_t ys, const uint32_t hm, const Mesh3d* obs)
     : Genome((xs-1)*(ys-1)*2), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
-    mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
+    // mesh_midpoints = new vertex[(xs-1)*(ys-1)*2]; // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
 
 }
 
@@ -18,9 +18,9 @@ SolarCollector::SolarCollector (const SolarCollector & other)
     obstacle = other.obstacle;
     reflecting = other.reflecting;
 
-    mesh_midpoints = new vertex[(other.xsize-1)*(other.ysize-1)*2]; // same size as the mesh
+    // mesh_midpoints = new vertex[(other.xsize-1)*(other.ysize-1)*2]; // same size as the mesh
 
-    std::copy(other.mesh_midpoints, other.mesh_midpoints + (other.xsize-1)*(other.ysize-1)*2, mesh_midpoints);
+    // std::copy(other.mesh_midpoints, other.mesh_midpoints + (other.xsize-1)*(other.ysize-1)*2, mesh_midpoints);
     
 }
 
@@ -30,11 +30,11 @@ SolarCollector::SolarCollector (SolarCollector&& other) noexcept
       ysize(std::move(other.ysize)),
       hmax(std::move(other.hmax)),
       shape_mesh(std::move(other.shape_mesh)),
-      mesh_midpoints(other.mesh_midpoints),
+    //   mesh_midpoints(other.mesh_midpoints),
       reflecting(std::move(other.reflecting)),
       obstacle(std::move(other.obstacle))
 {
-    other.mesh_midpoints = nullptr;
+    // other.mesh_midpoints = nullptr;
 }
 
 SolarCollector& SolarCollector::operator= (SolarCollector&& other) noexcept {
@@ -49,9 +49,9 @@ SolarCollector& SolarCollector::operator= (SolarCollector&& other) noexcept {
         reflecting = std::move(other.reflecting);
         obstacle = std::move(other.obstacle);
 
-        delete[] mesh_midpoints;
-        mesh_midpoints = other.mesh_midpoints;
-        other.mesh_midpoints = nullptr;
+        // delete[] mesh_midpoints;
+        // mesh_midpoints = other.mesh_midpoints;
+        // other.mesh_midpoints = nullptr;
     }
     return *this;
 }
@@ -67,15 +67,15 @@ SolarCollector& SolarCollector::operator= (const SolarCollector & other)
     reflecting = other.reflecting;
 
     shape_mesh = Mesh3d(other.shape_mesh); // we can use Mesh3d operator=
-    mesh_midpoints = new vertex[(other.xsize-1)*(other.ysize-1)*2]; // same size as the mesh
+    // mesh_midpoints = new vertex[(other.xsize-1)*(other.ysize-1)*2]; // same size as the mesh
 
-    std::copy(other.mesh_midpoints, other.mesh_midpoints + (other.xsize-1)*(other.ysize-1)*2, mesh_midpoints);
+    // std::copy(other.mesh_midpoints, other.mesh_midpoints + (other.xsize-1)*(other.ysize-1)*2, mesh_midpoints);
     
     return *this;
 }
 
 SolarCollector::~SolarCollector() {
-    delete[] mesh_midpoints;
+    // delete[] mesh_midpoints;
 }
 
 double SolarCollector::getXY(const uint32_t x, const uint32_t y) const {
@@ -158,21 +158,23 @@ void SolarCollector::computeMesh() {
             shape_mesh[i].v[1].x = x;     shape_mesh[i].v[1].z = y + 1; shape_mesh[i].v[1].y = getXY(x, y + 1);
             shape_mesh[i].v[2].x = x + 1; shape_mesh[i].v[2].z = y;     shape_mesh[i].v[2].y = getXY(x + 1, y);
             shape_mesh[i].normal = unitNormal(shape_mesh[i]);
+            shape_mesh[i].midpoint = tMidPoint(shape_mesh[i]);
             ++i;
 
             shape_mesh[i].v[0].x = x + 1; shape_mesh[i].v[0].z = y + 1; shape_mesh[i].v[0].y = getXY(x + 1, y + 1);
             shape_mesh[i].v[1].x = x + 1; shape_mesh[i].v[1].z = y;     shape_mesh[i].v[1].y = getXY(x + 1, y);
             shape_mesh[i].v[2].x = x;     shape_mesh[i].v[2].z = y + 1; shape_mesh[i].v[2].y = getXY(x, y + 1);
             shape_mesh[i].normal = unitNormal(shape_mesh[i]);
+            shape_mesh[i].midpoint = tMidPoint(shape_mesh[i]);
             ++i;
         }
     }
 }
 
-void SolarCollector::computeMeshMidpoints() {
-    for (uint32_t i = 0; i < shape_mesh.triangle_count; i++)
-        mesh_midpoints[i] = tMidPoint(shape_mesh[i]);
-}
+// void SolarCollector::computeMeshMidpoints() {
+//     for (uint32_t i = 0; i < shape_mesh.triangle_count; i++)
+//         mesh_midpoints[i] = tMidPoint(shape_mesh[i]);
+// }
 
 void SolarCollector::computeFitness(const vertex* rays, const uint32_t count_rays) {
     bool blocked = false;
@@ -190,7 +192,7 @@ void SolarCollector::computeFitness(const vertex* rays, const uint32_t count_ray
             for (uint32_t obsno = 0; obsno < obstacle->triangle_count; obsno++)
             {
                 // per obstacle triangle loop
-                if (rayMeetsObstacle(mesh_midpoints[trino], rays[rayno], obstacle->mesh[obsno], true)) ///  optimization potential (?) - collides(...,..., obstacle->mesh)
+                if (rayMeetsObstacle(shape_mesh[trino].midpoint, rays[rayno], obstacle->mesh[obsno], true)) ///  optimization potential (?) - collides(...,..., obstacle->mesh)
                 { 
                     blocked = true; // if a ray to the triangle is blocked then stop checking
                     break;
@@ -204,7 +206,7 @@ void SolarCollector::computeFitness(const vertex* rays, const uint32_t count_ray
                 // std::cout << reflection.x << ' ' << reflection.y << ' ' << reflection.z << std::endl;
                 for (uint32_t obsno = 0; obsno < obstacle->triangle_count; obsno++)
                 {
-                    if(rayMeetsObstacle(mesh_midpoints[trino], reflection, obstacle->mesh[obsno], false) == true)
+                    if(rayMeetsObstacle(shape_mesh[trino].midpoint, reflection, obstacle->mesh[obsno], false) == true)
                     {
                         // reflecting.push_back(shape_mesh[trino]);
                         fitness +=  1;

@@ -12,7 +12,7 @@ public:
     uint32_t hmax;  // maximal height (dictated by max printing height)
 
     Mesh3d shape_mesh; // mesh calculated from 'shape' member
-    vertex* mesh_midpoints; // precalculated mid points of every triangle of a mesh
+    // vertex* mesh_midpoints; // precalculated mid points of every triangle of a mesh
 
     std::vector<triangle> reflecting; // I think it's for checking the shape of the mesh built only from triangles that reflect the ray directly onto the obstacle - it's an overkill to store all triangles, just store bools or something
 
@@ -34,7 +34,7 @@ public:
     // so when having a ray == (x, y, z) we can transform all the coordinates so that ray becomes (0, -1, 0) and the check for intersection is faster
     bool rayMeetsObstacle(const vertex& source, const vertex& ray, const triangle& target, bool invertRay);
     void computeMesh();
-    void computeMeshMidpoints();
+    // void computeMeshMidpoints();
     void computeFitness(const vertex* rays, const uint32_t count_rays);
     void exportAsSTL(std::string name);
     void exportReflectionAsSTL();

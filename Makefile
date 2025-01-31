@@ -32,7 +32,7 @@ Solar-Collector-Shape-Optimiser/%.o: Solar-Collector-Shape-Optimiser/%.cpp
 
 # Clean rule
 clean:
-	rm -f $(OBJECTS) $(TARGET)
+	rm -f $(OBJECTS) $(TARGET) gmon.out
 
 # Phony targets
 .PHONY: all clean
