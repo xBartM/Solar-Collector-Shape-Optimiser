@@ -42,6 +42,35 @@ public:
     void exportSTL(const std::string filename);
 };
 
+class Mesh3dSoA {
+public:
+    uint32_t triangle_count; // number of triangles in mesh
+    // vertices defining triangles
+    std::vector<double> v0x, v0y, v0z; // x, y, z components of v0 vertex
+    std::vector<double> v1x, v1y, v1z; // x, y, z components of v1 vertex
+    std::vector<double> v2x, v2y, v2z; // x, y, z components of v2 vertex
+    // vertices defining normals
+    std::vector<double> normx, normy, normz; // x, y, z components of a normal
+    // vertices defining midpoints
+    std::vector<double> midpx, midpy, midpz; // x, y, z components of a midpoint
+
+    // constructors and a destructor
+    Mesh3dSoA();
+    Mesh3dSoA(const uint32_t triangle_count);
+    Mesh3dSoA(const std::string filename);
+    Mesh3dSoA(const Mesh3dSoA& other); // copy constructor
+    ~Mesh3dSoA();
+
+    // overloaded operators
+    // triangle& operator[](const uint32_t index);
+    Mesh3dSoA& operator= (const Mesh3dSoA& other);
+
+    // methods
+    void findCircumcentres();
+    void moveXY(const double& x, const double& y);
+    void exportSTL(const std::string filename);
+};
+
 vertex xProduct(const vertex& a, const vertex& b);
 double dotProduct(const vertex& a, const vertex& b);
 vertex substract(const vertex& a, const vertex& b);
