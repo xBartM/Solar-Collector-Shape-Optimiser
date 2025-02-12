@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <sstream>
 #include <execution>
 #include <ranges>
 
@@ -369,6 +370,27 @@ void Mesh3d::exportSTL(const std::string filename) {
 
     stlout << "endsolid Mesh3d" << std::endl;
     stlout.close();
+}
+
+void Mesh3dSoA::exportSTL(const std::string filename) {
+    std::ofstream stlout(filename, std::ofstream::trunc); // open file in a constructor, will be closed by destructor
+    std::stringstream stlmem; // Build the entire string in memory
+
+    stlmem << "solid Mesh3d" << std::endl;
+
+    for (uint32_t i = 0; i < triangle_count; ++i) {
+        stlmem << "facet normal " << normx[i] << " " << normy[i] << " " << normz[i] << std::endl;
+        stlmem << "   outer loop" << std::endl;
+        stlmem << "      vertex " << v0x[i] << " " << v0y[i] << " " << v0z[i] << std::endl;
+        stlmem << "      vertex " << v1x[i] << " " << v1y[i] << " " << v1z[i] << std::endl;
+        stlmem << "      vertex " << v2x[i] << " " << v2y[i] << " " << v2z[i] << std::endl;
+        stlmem << "   endloop" << std::endl;
+        stlmem << "endfacet" << std::endl;
+    }
+
+    stlmem << "endsolid Mesh3d" << std::endl;
+
+    stlout << stlmem.str(); // Write the entire string at once
 }
 
 vertex xProduct(const vertex& a, const vertex& b) {
