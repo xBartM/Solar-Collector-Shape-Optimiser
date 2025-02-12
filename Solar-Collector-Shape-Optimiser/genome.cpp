@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <vector>
 #include <ostream>
+#include <execution>
 
 #include <Solar-Collector-Shape-Optimiser/genome.hpp>
 
@@ -55,75 +56,30 @@ Genome& Genome::operator= (const Genome & other)
 
 Genome::~Genome() {}
 
-Genome Genome::crossoverAndMutateSoA(const Genome &other, double crossover_bias, double mutation_percent, double mutation_range) const {
+Genome Genome::crossoverAndMutateSoA(const Genome &other, double crossover_bias, double mutation_probability, double mutation_range) const {
     Genome offspring(dna_size);
 
-    std::random_device rd;
-    std::mt19937 mt(rd());
+    // TODO: random device and distributions could be static (but that takes away the control to dynamically change them with each crossoverAnd.. call (can be passed to function))
+    std::random_device rd;  // Used only to seed the mt19937 generator. Seeding should ideally happen once per thread
+    std::mt19937 mt(rd()); // thread_local would ensure each thread has its own generator.
 
-    // crossover_bias - choose which Genom dna is the parent
-    std::discrete_distribution<bool> crossover_choice_dist({100.0-crossover_bias, crossover_bias}); // ex. crossover_bias=60.0 (60% of genome from first, 40% from second), generates 0 40% of the time and 1 60% of the time
-    std::vector<bool> crossover_choice_first; // if 1 (true) then take first 
-    // std::vector<bool> crossover_choice_second; // if 1 (true) then take second
-    crossover_choice_first.resize(dna_size); // reserve memory needed
-    // crossover_choice_second.resize(dna_size); // reserve memory needed
-    for (uint32_t i = 0; i < dna_size; ++i) {
-        // bool temp = crossover_choice_dist(mt);
-        crossover_choice_first[i] = crossover_choice_dist(mt); //temp;
-        // crossover_choice_second[i] = !temp;
-    }
+    // Crossover bias (probability of using genes from the first parent (this))
+    std::bernoulli_distribution crossover_choice_dist(crossover_bias);
+    // Mutation (probability of applying mutation and it's amount)
+    std::bernoulli_distribution mutation_choice_dist(mutation_probability);
+    std::uniform_real_distribution<double> mutation_amount_dist(-mutation_range, mutation_range);
 
-    // mutation_percent - choose whether to mutate or not
-    std::discrete_distribution<bool> mutation_choice_dist({100.0-mutation_percent, mutation_percent}); // ex. mutation_percent=5.0 (5% of dna mutated, 95% not)
-    std::vector<bool> mutation_flag; // if 1 (true) then mutate 
-    mutation_flag.resize(dna_size); // reserve memory needed
-    for (uint32_t i = 0; i < dna_size; ++i) {
-        mutation_flag[i] = mutation_choice_dist(mt);
-    }
+    // Use std::transform with std::execution::par_unseq (parallel execution)
+    std::transform(std::execution::par_unseq, dna.begin(), dna.end(), other.dna.begin(), offspring.dna.begin(),
+        [&](double dna1_val, double dna2_val) {
+            const bool crossover_choice = crossover_choice_dist(mt);
+            const bool mutation_flag = mutation_choice_dist(mt);
+            const double mutation_amount = mutation_amount_dist(mt);
 
-    // mutation_range - how much to add/remove from dna point
-    std::uniform_real_distribution<double> mutation_amt_dist(-mutation_range, mutation_range); // distribution of how much to add/remove (amount) from dna point
-    std::vector<double> mutation_amt; // amount by which mutate
-    mutation_amt.resize(dna_size); // reserve memory needed
-    for (uint32_t i = 0; i < dna_size; ++i) {
-        mutation_amt[i] = mutation_amt_dist(mt);
-    }
-
-    // merge two dnas: dna1*bool1 + dna2*!bool1 + mutation*bool2
-    for (uint32_t i = 0; i < dna_size; ++i) {
-        offspring.dna[i] = dna[i] * crossover_choice_first[i] 
-                         + other.dna[i] * !crossover_choice_first[i] 
-                         + mutation_amt[i] * mutation_flag[i];  
-    }
-
-    return offspring;
-}
-
-Genome Genome::crossoverAndMutate(const Genome &other, double crossover_bias, double mutation_percent, double mutation_range) const {
-    Genome offspring(dna_size);
-
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_real_distribution<double> crossover_dist(0.0, 100.0);
-    std::uniform_real_distribution<double> mutation_chance_dist(0.0, 100.0); // added for comparing with mutation_percent
-    std::uniform_real_distribution<double> mutation_dist(-mutation_range, mutation_range); // distribution of how much to add/remove (amount) from dna point
-
- 
-    for (uint32_t i = 0; i < dna_size; ++i) {
-        if (crossover_dist(mt) < crossover_bias) {
-            if (mutation_percent > 0 && mutation_chance_dist(mt) < mutation_percent) { // changed comparison to use mutation_chance_dist
-                offspring.dna[i] = dna[i] + mutation_dist(mt);
-            } else {
-                offspring.dna[i] = dna[i];
-            }
-        } else {
-            if (mutation_percent > 0 && mutation_chance_dist(mt) < mutation_percent) { // changed comparison to use mutation_chance_dist
-                offspring.dna[i] = other.dna[i] + mutation_dist(mt);
-            } else {
-                offspring.dna[i] = other.dna[i];
-            }
+            // merge two dnas
+            return (crossover_choice ? dna1_val : dna2_val) + (mutation_flag ? mutation_amount : 0.0);
         }
-    }
+    );
 
     return offspring;
 }
