@@ -4,11 +4,11 @@
 #include <vector>
 #include <algorithm>
 #include <random>
-// #include <chrono>
+#include <chrono>
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
-// #define MAIN_TIMED
+#define MAIN_TIMED
 
 using namespace std;
 
@@ -16,11 +16,11 @@ void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint3
 
 int main (int argc, char** argv)
 {
-    // #ifdef MAIN_TIMED
-    // auto start = chrono::high_resolution_clock::now();
-    // auto end = chrono::high_resolution_clock::now();
-    // chrono::duration<double> deltatime = end - start;
-    // #endif // MAIN_TIMED
+    #ifdef MAIN_TIMED
+    auto start = chrono::high_resolution_clock::now();
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> deltatime = end - start;
+    #endif // MAIN_TIMED
 
     uint32_t xsize;   // size of the panel (in mm preferably?)
     uint32_t ysize;   // -||-
@@ -47,13 +47,26 @@ int main (int argc, char** argv)
     mt19937 mt(rd());
     uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
 
+    #ifdef MAIN_TIMED
+    end = chrono::high_resolution_clock::now();
+    deltatime = end - start;
+    std::cout << "Setting up main() variables: " << deltatime.count() << " s\n";
+    start = chrono::high_resolution_clock::now();
+    #endif // MAIN_TIMED
+
     Mesh3d obs("obstacle.stl");
     obs.moveXY((xsize-1.0)/2.0, (hmax-1.0)/2.0);
     //obs.exportSTL("my_obstacle.stl");
 
+    #ifdef MAIN_TIMED
+    end = chrono::high_resolution_clock::now();
+    deltatime = end - start;
+    std::cout << "Setting up the obstacle: " << deltatime.count() << " s\n";
+    start = chrono::high_resolution_clock::now();
+    #endif // MAIN_TIMED
+
     // findProperHmaxDist(xsize, ysize, hmax, &obs);
 
-    // start = chrono::high_resolution_clock::now();
     // vector<Genome> gene_pool;
     vector<SolarCollector> population;
     population.reserve(popsize); // reserve space to avoid reallocations
@@ -64,26 +77,36 @@ int main (int argc, char** argv)
         population[i].computeMesh();
 
     }
-    // end = chrono::high_resolution_clock::now();
-    // deltatime = end - start;
-    // std::cout << "Setting up population: " << deltatime.count() << " s\n";
 
+    // format text for CSV integration
     cout << "Gen";
     for (uint32_t i = 0; i < popsize; i++)
         cout << ";F" << to_string(i);
     cout << endl;
+
+    #ifdef MAIN_TIMED
+    end = chrono::high_resolution_clock::now();
+    deltatime = end - start;
+    std::cout << "Setting up population: " << deltatime.count() << " s\n";
+    start = chrono::high_resolution_clock::now();
+    #endif // MAIN_TIMED
+
     while (true)
     {
-        // start = chrono::high_resolution_clock::now();
         #pragma omp parallel for num_threads(4)
         for (auto pop = population.rbegin(); pop != population.rend(); pop++)
             if (pop->fitness == 0)
                 pop->computeFitness(&ray, 1);
                 // else cout << "skipped" << endl;
             // pop.exportReflectionsAsSTL(); // ??
-        // end = chrono::high_resolution_clock::now();
-        // deltatime = end - start;
-        // std::cout << "Computing fitness: " << deltatime.count() << " s\n";
+        
+        #ifdef MAIN_TIMED
+        end = chrono::high_resolution_clock::now();
+        deltatime = end - start;
+        std::cout << "Computing fitness: " << deltatime.count() << " s\n";
+        start = chrono::high_resolution_clock::now();
+        #endif // MAIN_TIMED
+
         sort(population.begin(), population.end()); // WRONG WAY (but it works - i think even better.. 2gen max 15k...) // sorted best to worst
 
         cout << to_string(generation);
@@ -91,17 +114,26 @@ int main (int argc, char** argv)
             cout << ";" << to_string(pop->fitness);
             // cout << *pop << endl;
         cout << endl;
+  
+        #ifdef MAIN_TIMED
+        end = chrono::high_resolution_clock::now();
+        deltatime = end - start;
+        std::cout << "Sorting and printing: " << deltatime.count() << " s\n";
+        start = chrono::high_resolution_clock::now();
+        #endif // MAIN_TIMED
 
-        // start = chrono::high_resolution_clock::now();
         for (uint32_t i = 0; i < popsize/3 ; i++)    // remove the weak
         {
             // delete population.back();
             population.pop_back();
         }
-
-        // end = chrono::high_resolution_clock::now();
-        // deltatime = end - start;
-        // std::cout << "Erasing: " << deltatime.count() << " s\n";
+        
+        #ifdef MAIN_TIMED
+        end = chrono::high_resolution_clock::now();
+        deltatime = end - start;
+        std::cout << "Erasing: " << deltatime.count() << " s\n";
+        start = chrono::high_resolution_clock::now();
+        #endif // MAIN_TIMED
 
         // start = chrono::high_resolution_clock::now();
         for (auto pop = population.begin(); population.size() < popsize; pop++)
@@ -122,9 +154,13 @@ int main (int argc, char** argv)
             population.push_back(std::move(child));
   
         }
-        // end = chrono::high_resolution_clock::now();
-        // deltatime = end - start;
-        // std::cout << "Crossover: " << deltatime.count() << " s\n";
+
+        #ifdef MAIN_TIMED
+        end = chrono::high_resolution_clock::now();
+        deltatime = end - start;
+        std::cout << "Crossover and mutation: " << deltatime.count() << " s\n";
+        start = chrono::high_resolution_clock::now();
+        #endif // MAIN_TIMED
 
         // dont mutate the elites
         // cout << "crossovered" << endl;
