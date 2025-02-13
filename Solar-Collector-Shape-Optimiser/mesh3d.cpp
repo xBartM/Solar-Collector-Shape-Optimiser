@@ -10,7 +10,9 @@
 
 Mesh3d::Mesh3d() {}
 
-Mesh3dSoA::Mesh3dSoA() : triangle_count(0) {}
+Mesh3dSoA::Mesh3dSoA() 
+    : triangle_count(0) 
+{}
 
 Mesh3d::Mesh3d(const uint32_t triangle_count) : triangle_count(triangle_count) {
     // Allocate memory for the new mesh based on the copied triangle count
@@ -18,42 +20,17 @@ Mesh3d::Mesh3d(const uint32_t triangle_count) : triangle_count(triangle_count) {
     
 }
 
-Mesh3dSoA::Mesh3dSoA(const uint32_t triangle_count) : triangle_count(triangle_count) {
-    // Reserve space to avoid reallocations.
-    v0x.reserve(triangle_count);
-    v0y.reserve(triangle_count);
-    v0z.reserve(triangle_count);
-    v1x.reserve(triangle_count);
-    v1y.reserve(triangle_count);
-    v1z.reserve(triangle_count);
-    v2x.reserve(triangle_count);
-    v2y.reserve(triangle_count);
-    v2z.reserve(triangle_count);
-    normx.reserve(triangle_count);
-    normy.reserve(triangle_count);
-    normz.reserve(triangle_count);
-    midpx.reserve(triangle_count);
-    midpy.reserve(triangle_count);
-    midpz.reserve(triangle_count);
-
-    // Resize to pre-allocate.  Values will be zero-initialized.
-    v0x.resize(triangle_count);
-    v0y.resize(triangle_count);
-    v0z.resize(triangle_count);
-    v1x.resize(triangle_count);
-    v1y.resize(triangle_count);
-    v1z.resize(triangle_count);
-    v2x.resize(triangle_count);
-    v2y.resize(triangle_count);
-    v2z.resize(triangle_count);
-    normx.resize(triangle_count);
-    normy.resize(triangle_count);
-    normz.resize(triangle_count);
-    midpx.resize(triangle_count);
-    midpy.resize(triangle_count);
-    midpz.resize(triangle_count);
-
-}
+Mesh3dSoA::Mesh3dSoA(const uint32_t triangle_count) 
+    : triangle_count(triangle_count) 
+    , v0x(triangle_count), v0y(triangle_count), v0z(triangle_count)
+    , v1x(triangle_count), v1y(triangle_count), v1z(triangle_count)
+    , v2x(triangle_count), v2y(triangle_count), v2z(triangle_count)
+    , normx(triangle_count), normy(triangle_count), normz(triangle_count)
+    , midpx(triangle_count), midpy(triangle_count), midpz(triangle_count)
+    , e1x(triangle_count), e1y(triangle_count), e1z(triangle_count)
+    , e2x(triangle_count), e2y(triangle_count), e2z(triangle_count)
+    , obs_blocked(triangle_count)
+{}
 
 Mesh3d::Mesh3d(const std::string filename) { importSTL(filename); }
 
@@ -69,40 +46,15 @@ Mesh3dSoA::Mesh3dSoA(const std::string filename) {
         triangle_count -= 2;
         triangle_count /= 7;
 
-        // Reserve space to avoid reallocations.
-        v0x.reserve(triangle_count);
-        v0y.reserve(triangle_count);
-        v0z.reserve(triangle_count);
-        v1x.reserve(triangle_count);
-        v1y.reserve(triangle_count);
-        v1z.reserve(triangle_count);
-        v2x.reserve(triangle_count);
-        v2y.reserve(triangle_count);
-        v2z.reserve(triangle_count);
-        normx.reserve(triangle_count);
-        normy.reserve(triangle_count);
-        normz.reserve(triangle_count);
-        midpx.reserve(triangle_count);
-        midpy.reserve(triangle_count);
-        midpz.reserve(triangle_count);
-
         // Resize to access elements via operator[]
-        v0x.resize(triangle_count);
-        v0y.resize(triangle_count);
-        v0z.resize(triangle_count);
-        v1x.resize(triangle_count);
-        v1y.resize(triangle_count);
-        v1z.resize(triangle_count);
-        v2x.resize(triangle_count);
-        v2y.resize(triangle_count);
-        v2z.resize(triangle_count);
-        normx.resize(triangle_count);
-        normy.resize(triangle_count);
-        normz.resize(triangle_count);
-        midpx.resize(triangle_count);
-        midpy.resize(triangle_count);
-        midpz.resize(triangle_count);
-
+        v0x.resize(triangle_count); v0y.resize(triangle_count); v0z.resize(triangle_count);
+        v1x.resize(triangle_count); v1y.resize(triangle_count); v1z.resize(triangle_count); 
+        v2x.resize(triangle_count); v2y.resize(triangle_count); v2z.resize(triangle_count);
+        normx.resize(triangle_count); normy.resize(triangle_count); normz.resize(triangle_count);
+        midpx.resize(triangle_count); midpy.resize(triangle_count); midpz.resize(triangle_count);
+        e1x.resize(triangle_count); e1y.resize(triangle_count); e1z.resize(triangle_count);
+        e2x.resize(triangle_count); e2y.resize(triangle_count); e2z.resize(triangle_count);
+        obs_blocked.resize(triangle_count);
 
         file.seekg(0, file.beg);    // return to beginning
         file.clear();               // clear flags (especially eof flag)
@@ -176,23 +128,18 @@ Mesh3dSoA::Mesh3dSoA(const std::string filename) {
 
 Mesh3d::Mesh3d(const Mesh3d& other) : triangle_count(other.triangle_count), mesh(other.mesh) {}
 
-Mesh3dSoA::Mesh3dSoA(const Mesh3dSoA& other) : triangle_count(other.triangle_count) {
-    v0x = other.v0x;
-    v0y = other.v0y;
-    v0z = other.v0z;
-    v1x = other.v1x;
-    v1y = other.v1y;
-    v1z = other.v1z;
-    v2x = other.v2x;
-    v2y = other.v2y;
-    v2z = other.v2z;
-    normx = other.normx;
-    normy = other.normy;
-    normz = other.normz;
-    midpx = other.midpx;
-    midpy = other.midpy;
-    midpz = other.midpz;
-}
+Mesh3dSoA::Mesh3dSoA(const Mesh3dSoA& other) 
+    : triangle_count(other.triangle_count) 
+    // Copy all vector data.  Use assignment operator= for vectors.
+    , v0x(other.v0x), v0y(other.v0y), v0z(other.v0z)
+    , v1x(other.v1x), v1y(other.v1y), v1z(other.v1z)
+    , v2x(other.v2x), v2y(other.v2y), v2z(other.v2z)
+    , normx(other.normx), normy(other.normy), normz(other.normz)
+    , midpx(other.midpx), midpy(other.midpy), midpz(other.midpz)
+    , e1x(other.e1x), e1y(other.e1y), e1z(other.e1z)
+    , e2x(other.e2x), e2y(other.e2y), e2z(other.e2z)
+    , obs_blocked(other.obs_blocked)
+{}
 
 Mesh3d::~Mesh3d() {}
 
@@ -219,21 +166,14 @@ Mesh3dSoA& Mesh3dSoA::operator=(const Mesh3dSoA& other) {
     if (this != &other) { // Protect against self-assignment
         triangle_count = other.triangle_count;
 
-        v0x = other.v0x;
-        v0y = other.v0y;
-        v0z = other.v0z;
-        v1x = other.v1x;
-        v1y = other.v1y;
-        v1z = other.v1z;
-        v2x = other.v2x;
-        v2y = other.v2y;
-        v2z = other.v2z;
-        normx = other.normx;
-        normy = other.normy;
-        normz = other.normz;
-        midpx = other.midpx;
-        midpy = other.midpy;
-        midpz = other.midpz;
+        v0x = other.v0x; v0y = other.v0y; v0z = other.v0z;
+        v1x = other.v1x; v1y = other.v1y; v1z = other.v1z;
+        v2x = other.v2x; v2y = other.v2y; v2z = other.v2z;
+        normx = other.normx; normy = other.normy; normz = other.normz;
+        midpx = other.midpx; midpy = other.midpy; midpz = other.midpz;
+        e1x = other.e1x; e1y = other.e1y; e1z = other.e1z;
+        e2x = other.e2x; e2y = other.e2y; e2z = other.e2z;
+        obs_blocked = other.obs_blocked;
     }
     return *this;
 }
@@ -506,8 +446,83 @@ void Mesh3dSoA::findCircumcentres() {
     });
 }
 
+void Mesh3dSoA::findNormals() {
+    if (triangle_count == 0) {
+        return; // Nothing to do for an empty mesh.
+    }
+
+    // Use std::for_each with std::execution::par_unseq to parallelize the normal calculation.
+    std::for_each(std::execution::par_unseq,
+                  std::views::iota(0u, triangle_count).begin(), // Use iota view
+                  std::views::iota(0u, triangle_count).end(),
+                  [this](uint32_t i) {
+        // Compute the vectors representing two sides of the triangle.
+        const double edge1x = v1x[i] - v0x[i];
+        const double edge1y = v1y[i] - v0y[i];
+        const double edge1z = v1z[i] - v0z[i];
+
+        const double edge2x = v2x[i] - v0x[i];
+        const double edge2y = v2y[i] - v0y[i];
+        const double edge2z = v2z[i] - v0z[i];
+
+        // Compute the cross product (normal vector).
+        const double nx = edge1y * edge2z - edge1z * edge2y;
+        const double ny = edge1z * edge2x - edge1x * edge2z;
+        const double nz = edge1x * edge2y - edge1y * edge2x;
+
+        // Normalize the normal vector.
+        const double magnitude = std::sqrt(nx * nx + ny * ny + nz * nz);
+
+        // Handle the case where the triangle is degenerate (magnitude is zero or very close to zero).
+        if (magnitude > 1e-12) // Use a small tolerance to avoid division by zero.
+        {
+            normx[i] = nx / magnitude;
+            normy[i] = ny / magnitude;
+            normz[i] = nz / magnitude;
+        } else {
+            // For degenerate triangles, set the normal to a default value (e.g., zero).
+            normx[i] = 0.0;
+            normy[i] = 0.0;
+            normz[i] = 0.0;
+        }
+    });
+}
+
+void Mesh3dSoA::findEdges() {
+    // resize vectors to acces via operator[]
+    e1x.resize(triangle_count); e1y.resize(triangle_count); e1z.resize(triangle_count);
+    e2x.resize(triangle_count); e2y.resize(triangle_count); e2z.resize(triangle_count);
+    obs_blocked.resize(triangle_count);
+
+    // Precompute obstacle edges
+    std::for_each(std::execution::par_unseq,
+                std::views::iota(0u, triangle_count).begin(), // Use iota view
+                std::views::iota(0u, triangle_count).end(),
+                [this](uint32_t i) {
+        
+        e1x[i] = v1x[i] - v0x[i];
+        e1y[i] = v1y[i] - v0y[i];
+        e1z[i] = v1z[i] - v0z[i];
+
+        e2x[i] = v2x[i] - v0x[i];
+        e2y[i] = v2y[i] - v0y[i];
+        e2z[i] = v2z[i] - v0z[i];
+    });
+
+}
 
 vertex calculateReflection(const triangle& t, const vertex& ray) {
-    const vertex invray(substract(vertex(0, 0, 0), ray));
-    return substract(multiply(t.normal, 2 * dotProduct(t.normal, invray)), invray);
+    return calculateReflection(unitNormal(t), ray);
+
+    // const vertex invray(substract(vertex(0, 0, 0), ray));
+    // return substract(multiply(t.normal, 2 * dotProduct(t.normal, invray)), invray);
+
+}
+
+vertex calculateReflection(const vertex& normal, const vertex& ray) {
+    // reflection = ray - 2 * dotProduct(ray, normal) * normal
+    const double dot = dotProduct(ray, normal);
+    return vertex{ray.x - 2.0 * dot * normal.x,
+                  ray.y - 2.0 * dot * normal.y,
+                  ray.z - 2.0 * dot * normal.z};
 }

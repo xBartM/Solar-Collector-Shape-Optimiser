@@ -45,6 +45,7 @@ public:
 class Mesh3dSoA {
 public:
     uint32_t triangle_count; // number of triangles in mesh
+
     // vertices defining triangles
     std::vector<double> v0x, v0y, v0z; // x, y, z components of v0 vertex
     std::vector<double> v1x, v1y, v1z; // x, y, z components of v1 vertex
@@ -53,6 +54,14 @@ public:
     std::vector<double> normx, normy, normz; // x, y, z components of a normal
     // vertices defining midpoints
     std::vector<double> midpx, midpy, midpz; // x, y, z components of a midpoint
+
+    // OPTIONAL: edges for finding intersections in with obstacle
+    std::vector<double> e1x; std::vector<double> e1y; std::vector<double> e1z; // v1 - v0
+    std::vector<double> e2x; std::vector<double> e2y; std::vector<double> e2z; // v2 - v0
+    std::vector<bool> obs_blocked;
+
+
+    // TODO bounding box; make it recursive up to the depth of 4(?)
 
     // constructors and a destructor
     Mesh3dSoA();
@@ -67,6 +76,8 @@ public:
 
     // methods
     void findCircumcentres();
+    void findNormals();
+    void findEdges();
     void moveXY(const double& x, const double& y);
     void exportSTL(const std::string filename);
 };
@@ -81,5 +92,6 @@ vertex unitNormal(const vertex& v0, const vertex& v1, const vertex& v2);
 vertex unitNormal(const triangle& t);
 vertex tMidPoint(const triangle& t);
 vertex calculateReflection(const triangle& t, const vertex& ray);
+vertex calculateReflection(const vertex& normal, const vertex& ray);
 
 #endif // MESH3D
