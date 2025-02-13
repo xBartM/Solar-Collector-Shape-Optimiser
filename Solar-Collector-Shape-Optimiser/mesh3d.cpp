@@ -8,19 +8,11 @@
 #include <Solar-Collector-Shape-Optimiser/mesh3d.hpp>
 
 
-Mesh3d::Mesh3d() {}
-
-Mesh3dSoA::Mesh3dSoA() 
+Mesh3d::Mesh3d() 
     : triangle_count(0) 
 {}
 
-Mesh3d::Mesh3d(const uint32_t triangle_count) : triangle_count(triangle_count) {
-    // Allocate memory for the new mesh based on the copied triangle count
-    mesh.resize(triangle_count);
-    
-}
-
-Mesh3dSoA::Mesh3dSoA(const uint32_t triangle_count) 
+Mesh3d::Mesh3d(const uint32_t triangle_count) 
     : triangle_count(triangle_count) 
     , v0x(triangle_count), v0y(triangle_count), v0z(triangle_count)
     , v1x(triangle_count), v1y(triangle_count), v1z(triangle_count)
@@ -32,10 +24,8 @@ Mesh3dSoA::Mesh3dSoA(const uint32_t triangle_count)
     , obs_blocked(triangle_count)
 {}
 
-Mesh3d::Mesh3d(const std::string filename) { importSTL(filename); }
-
 // Constructor from file (STL)
-Mesh3dSoA::Mesh3dSoA(const std::string filename) {
+Mesh3d::Mesh3d(const std::string filename) {
     std::string line;
     std::ifstream file(filename, std::ifstream::in);
 
@@ -126,9 +116,7 @@ Mesh3dSoA::Mesh3dSoA(const std::string filename) {
 
 }
 
-Mesh3d::Mesh3d(const Mesh3d& other) : triangle_count(other.triangle_count), mesh(other.mesh) {}
-
-Mesh3dSoA::Mesh3dSoA(const Mesh3dSoA& other) 
+Mesh3d::Mesh3d(const Mesh3d& other) 
     : triangle_count(other.triangle_count) 
     // Copy all vector data.  Use assignment operator= for vectors.
     , v0x(other.v0x), v0y(other.v0y), v0z(other.v0z)
@@ -143,26 +131,8 @@ Mesh3dSoA::Mesh3dSoA(const Mesh3dSoA& other)
 
 Mesh3d::~Mesh3d() {}
 
-Mesh3dSoA::~Mesh3dSoA() {}
-
-
-triangle& Mesh3d::operator[] (const uint32_t index) {
-    // if (index >= triangle_count) {
-    //     throw std::out_of_range("Index out of bounds");
-    // }
-    return mesh[index];
-}
-
-Mesh3d& Mesh3d::operator= (const Mesh3d& other) {
-    if (this != &other) { // Self-assignment check
-        triangle_count = other.triangle_count;
-        mesh = other.mesh; // Use vector's assignment operator
-    }
-    return *this;
-}
-
 // Assignment operator
-Mesh3dSoA& Mesh3dSoA::operator=(const Mesh3dSoA& other) {
+Mesh3d& Mesh3d::operator=(const Mesh3d& other) {
     if (this != &other) { // Protect against self-assignment
         triangle_count = other.triangle_count;
 
@@ -178,15 +148,7 @@ Mesh3dSoA& Mesh3dSoA::operator=(const Mesh3dSoA& other) {
     return *this;
 }
 
-
-void Mesh3d::moveXY(const double x, const double y) {
-    for (auto& t : mesh) {
-        t.v[0].x += x; t.v[1].x += x; t.v[2].x += x;
-        t.v[0].y += y; t.v[1].y += y; t.v[2].y += y;
-    }
-}
-
-void Mesh3dSoA::moveXY(const double& x, const double& y) {
+void Mesh3d::moveXY(const double& x, const double& y) {
     // Use std::for_each with std::execution::par_unseq for parallel execution.
 
     // Apply the translation to all x and y components of vertices and midpoints.
@@ -211,7 +173,7 @@ void Mesh3dSoA::moveXY(const double& x, const double& y) {
 
     // Do NOT transform normals.  Normals represent direction and are invariant under translation.
 }
-
+/*
 void Mesh3d::importSTL(const std::string filename) {
     std::string line;
     std::ifstream file(filename, std::ifstream::in);
@@ -291,28 +253,8 @@ void Mesh3d::importSTL(const std::string filename) {
         file.close();
     }
 }
-
+*/
 void Mesh3d::exportSTL(const std::string filename) {
-    std::ofstream stlout;
-    
-    stlout.open(filename, std::ofstream::trunc);
-    stlout << "solid Mesh3d" << std::endl;
-
-    for (const auto& t : mesh) {
-        stlout << "facet normal " << t.normal.x << " " << t.normal.y << " " << t.normal.z << std::endl;
-        stlout << "   outer loop" << std::endl;
-        stlout << "      vertex " << t.v[0].x << " " << t.v[0].y << " " << t.v[0].z << std::endl;
-        stlout << "      vertex " << t.v[1].x << " " << t.v[1].y << " " << t.v[1].z << std::endl;
-        stlout << "      vertex " << t.v[2].x << " " << t.v[2].y << " " << t.v[2].z << std::endl;
-        stlout << "   endloop" << std::endl;
-        stlout << "endfacet" << std::endl;
-    }
-
-    stlout << "endsolid Mesh3d" << std::endl;
-    stlout.close();
-}
-
-void Mesh3dSoA::exportSTL(const std::string filename) {
     std::ofstream stlout(filename, std::ofstream::trunc); // open file in a constructor, will be closed by destructor
     std::stringstream stlmem; // Build the entire string in memory
 
@@ -396,7 +338,7 @@ vertex tMidPoint(const triangle& t) {
     return add(divide(xProduct(substract(multiply(b, dotProduct(a, a)), multiply(a, dotProduct(b, b))), axb), dotProduct(axb, axb) * 2), t.v[2]);
 }
 
-void Mesh3dSoA::findCircumcentres() {
+void Mesh3d::findCircumcentres() {
 
     // Use parallel execution policy for maximum performance.
     std::for_each(std::execution::par_unseq,
@@ -446,7 +388,7 @@ void Mesh3dSoA::findCircumcentres() {
     });
 }
 
-void Mesh3dSoA::findNormals() {
+void Mesh3d::findNormals() {
     if (triangle_count == 0) {
         return; // Nothing to do for an empty mesh.
     }
@@ -488,7 +430,7 @@ void Mesh3dSoA::findNormals() {
     });
 }
 
-void Mesh3dSoA::findEdges() {
+void Mesh3d::findEdges() {
     // resize vectors to acces via operator[]
     e1x.resize(triangle_count); e1y.resize(triangle_count); e1z.resize(triangle_count);
     e2x.resize(triangle_count); e2y.resize(triangle_count); e2z.resize(triangle_count);

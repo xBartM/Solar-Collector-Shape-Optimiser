@@ -5,6 +5,7 @@ CXX = g++
 CXXFLAGS = -std=c++23 -Wall -Wextra -pedantic -fopenmp -I.
 # Use '-g' to generate debug information, or '-O3' for optimization
 CXXFLAGS += -pg -g
+# CXXFLAGS += -O2
 # CXXFLAGS += -O3
 # Output executable name
 TARGET = solar_optimiser

@@ -57,10 +57,8 @@ int main (int argc, char** argv)
 
     // obs2 should be const
     Mesh3d obs("obstacle.stl");
-    Mesh3dSoA obs2("obstacle.stl");
     obs.moveXY((xsize-1.0)/2.0, (hmax-1.0)/2.0);
-    obs2.moveXY((xsize-1.0)/2.0, (hmax-1.0)/2.0);
-    obs2.findEdges(); // needed later for Moller-.. intersection algorithm
+    obs.findEdges(); // needed later for Moller-.. intersection algorithm
     //obs.exportSTL("my_obstacle.stl");
 
     #ifdef MAIN_TIMED
@@ -80,17 +78,6 @@ int main (int argc, char** argv)
         for (uint32_t k = 0; k < xsize*ysize; k++)
             population[i].setXY(k, 0, dist(mt));
         population[i].computeMesh();
-        // population[i].computeMeshSoA();
-
-    }
-
-    vector<SolarCollector> population2;
-    population2.reserve(popsize); // reserve space to avoid reallocations
-    for (uint32_t i = 0, j = 0; i < popsize; i++, j++) {
-        population2.emplace_back(xsize, ysize, hmax, &obs2);
-        for (uint32_t k = 0; k < xsize*ysize; k++)
-            population2[i].setXY(k, 0, dist(mt));
-        population2[i].computeMeshSoA();
 
     }
 
@@ -112,21 +99,7 @@ int main (int argc, char** argv)
         #pragma omp parallel for num_threads(4)
         for (auto pop = population.rbegin(); pop != population.rend(); pop++)
             if (pop->fitness == 0)
-                pop->computeFitness(&ray, 1);
-                // else cout << "skipped" << endl;
-            // pop.exportReflectionsAsSTL(); // ??
-
-        #ifdef MAIN_TIMED
-        end = chrono::high_resolution_clock::now();
-        deltatime = end - start;
-        std::cout << "Computing fitness: " << deltatime.count() << " s\n";
-        start = chrono::high_resolution_clock::now();
-        #endif // MAIN_TIMED
-
-        #pragma omp parallel for num_threads(4)
-        for (auto pop = population2.rbegin(); pop != population2.rend(); pop++)
-            if (pop->fitness == 0)
-                pop->computeFitnessSoA(rays);
+                pop->computeFitness(rays);
                 // else cout << "skipped" << endl;
             // pop.exportReflectionsAsSTL(); // ??
 
@@ -138,16 +111,9 @@ int main (int argc, char** argv)
         #endif // MAIN_TIMED
 
         sort(population.begin(), population.end()); // WRONG WAY (but it works - i think even better.. 2gen max 15k...) // sorted best to worst
-        sort(population2.begin(), population2.end()); // WRONG WAY (but it works - i think even better.. 2gen max 15k...) // sorted best to worst
 
         cout << to_string(generation);
         for (auto pop = population.begin(); pop != population.end(); pop++)
-            cout << ";" << to_string(pop->fitness);
-            // cout << *pop << endl;
-        cout << endl;
-
-        cout << to_string(generation);
-        for (auto pop = population2.begin(); pop != population2.end(); pop++)
             cout << ";" << to_string(pop->fitness);
             // cout << *pop << endl;
         cout << endl;
@@ -163,7 +129,6 @@ int main (int argc, char** argv)
         {
             // delete population.back();
             population.pop_back();
-            population2.pop_back();
         }
         
         #ifdef MAIN_TIMED
@@ -180,8 +145,8 @@ int main (int argc, char** argv)
             // population.push_back(crossoverAndMutate(*pop, *(pop+1), 60, 5));
 
             // Use the crossoverAndMutate method from the Genome class
-            // auto offspring = pop->crossoverAndMutateSoA(*(pop + 1), 60.0, 5.0, 0.225);
-            auto offspring = pop->crossoverAndMutateSoA(*(pop + 1), 0.6, 0.05, 0.225);
+            // auto offspring = pop->crossoverAndMutate(*(pop + 1), 60.0, 5.0, 0.225);
+            auto offspring = pop->crossoverAndMutate(*(pop + 1), 0.6, 0.05, 0.225);
 
             // Convert Genome to SolarCollector (assuming constructor compatibility)
             SolarCollector child(xsize, ysize, hmax, &obs);
@@ -193,25 +158,6 @@ int main (int argc, char** argv)
   
         }
          
-       for (auto pop = population2.begin(); population2.size() < popsize; pop++)
-        {
-            // this could be offspring constructor xDD
-            // population.push_back(crossoverAndMutate(*pop, *(pop+1), 60, 5));
-
-            // Use the crossoverAndMutate method from the Genome class
-            // auto offspring = pop->crossoverAndMutateSoA(*(pop + 1), 60.0, 5.0, 0.225);
-            auto offspring = pop->crossoverAndMutateSoA(*(pop + 1), 0.6, 0.05, 0.225);
-
-            // Convert Genome to SolarCollector (assuming constructor compatibility)
-            SolarCollector child(xsize, ysize, hmax, &obs2);
-            child.dna = offspring.dna;
-
-            child.computeMeshSoA();
-
-            population2.push_back(std::move(child));
-  
-        }
-
         #ifdef MAIN_TIMED
         end = chrono::high_resolution_clock::now();
         deltatime = end - start;
@@ -234,6 +180,7 @@ void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint3
     constexpr uint32_t test_sample = 12;
     constexpr uint32_t test_batches = 9;
     vertex ray(0, -1, 0);
+    std::vector<vertex> rays({ray});
 
     random_device rd;
     mt19937 mt(rd());
@@ -257,7 +204,7 @@ void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint3
             for (uint32_t j = 0; j < xsize*ysize; j++)
                 pop->setXY(j, 0, dist(mt)*i);
             pop->computeMesh();
-            pop->computeFitness(&ray, 1);
+            pop->computeFitness(rays);
         }
 
         cout << to_string(i);

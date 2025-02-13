@@ -10,17 +10,12 @@
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
 SolarCollector::SolarCollector(const uint32_t xs, const uint32_t ys, const uint32_t hm, const Mesh3d* obs)
-    : Genome((xs-1)*(ys-1)*2), xsize(xs), ysize(ys), hmax(hm), shape_mesh((xs-1)*(ys-1)*2), obstacle(obs) { 
-
-}
-
-SolarCollector::SolarCollector(const uint32_t xs, const uint32_t ys, const uint32_t hm, const Mesh3dSoA* obs)
     : Genome((xs-1)*(ys-1)*2) // same size as the mesh - ex. 3x3 shape has 4 rectangles -> 8 triangles
     , xsize(xs)
     , ysize(ys)
     , hmax(hm)
-    , shape_mesh2((xs-1)*(ys-1)*2) // see comment above
-    , obstacle2(obs) 
+    , shape_mesh((xs-1)*(ys-1)*2) // see comment above
+    , obstacle(obs) 
 {}
 
 SolarCollector::SolarCollector (const SolarCollector & other)
@@ -29,9 +24,7 @@ SolarCollector::SolarCollector (const SolarCollector & other)
     , ysize(other.ysize)
     , hmax(other.hmax)
     , shape_mesh(other.shape_mesh)
-    , shape_mesh2(other.shape_mesh2)
     , obstacle(other.obstacle)
-    , obstacle2(other.obstacle2)
     , reflecting(other.reflecting)
 {}
 
@@ -41,9 +34,7 @@ SolarCollector::SolarCollector (SolarCollector&& other) noexcept
     , ysize(std::move(other.ysize))
     , hmax(std::move(other.hmax))
     , shape_mesh(std::move(other.shape_mesh))
-    , shape_mesh2(std::move(other.shape_mesh2))
     , obstacle(std::move(other.obstacle))
-    , obstacle2(std::move(other.obstacle2))
     , reflecting(std::move(other.reflecting))
 {}
 
@@ -55,9 +46,7 @@ SolarCollector& SolarCollector::operator= (SolarCollector&& other) noexcept {
         ysize = std::move(other.ysize);
         hmax = std::move(other.hmax);
         shape_mesh = std::move(other.shape_mesh);
-        shape_mesh2 = std::move(other.shape_mesh2);
         obstacle = std::move(other.obstacle);
-        obstacle2 = std::move(other.obstacle2);
         reflecting = std::move(other.reflecting);
 
     }
@@ -72,10 +61,8 @@ SolarCollector& SolarCollector::operator= (const SolarCollector & other)
     hmax = other.hmax;
 
     shape_mesh = Mesh3d(other.shape_mesh); // we can use Mesh3d operator=
-    shape_mesh2 = Mesh3dSoA(other.shape_mesh2); // we can use Mesh3dSoA operator=
 
     obstacle = other.obstacle;
-    obstacle2 = other.obstacle2;
  
     reflecting = other.reflecting;
     
@@ -106,95 +93,10 @@ void SolarCollector::showYourself() {
     }
 }
 
-bool SolarCollector::rayMeetsObstacle(const vertex& source, const vertex& ray, const triangle& target, bool invertRay) {
-    //Moller–Trumbore intersection algorithm
 
-    //const vertex invray = substract(vertex(0,0,0), ray);    // while checking if ray is blocked it is sent from the reflecting triangle
+bool SolarCollector::rayTriangleIntersect(
+    // Moller–Trumbore intersection algorithm - I think
 
-    //const vertex src_midpoint = tMidPoint(source);
-    const double EPSILON = 0.0000001;
-    const vertex vertex0 = target.v[0];
-    const vertex vertex1 = target.v[1];  
-    const vertex vertex2 = target.v[2];
-    const vertex edge1 = substract(vertex1, vertex0);
-    const vertex edge2 = substract(vertex2, vertex0); 
-
-    const vertex usedRay = invertRay ? substract(vertex(0,0,0), ray) : ray; // Invert the ray if needed
-
-    const vertex h = xProduct(usedRay, edge2); // Use the potentially inverted ray
-    vertex s, q;
-    const double a = dotProduct(edge1, h);
-    double f,u,v;
-    
-    if (a > -EPSILON && a < EPSILON)
-        return false;    // This ray is parallel to this triangle.
-    
-    f = 1.0/a;
-    s = substract(source, vertex0);
-    u = f * (dotProduct(s, h));
-    if (u < 0.0 || u > 1.0)
-        return false;
-
-    q = xProduct(s, edge1);
-    v = f * dotProduct(usedRay, q); // Use the potentially inverted ray
-    if (v < 0.0 || u + v > 1.0)
-        return false;
-
-    // At this stage we can compute t to find out where the intersection point is on the line.
-    double t = f * dotProduct(edge2, q);
-    if (t > EPSILON) // ray intersection
-    {
-        //outIntersectionPoint = rayOrigin + rayVector * t;
-        return true;
-    }
-    else // This means that there is a line intersection but not a ray intersection.
-        return false;
-}
-
-void SolarCollector::computeFitness(const vertex* rays, const uint32_t count_rays) {
-    bool blocked = false;
-    vertex reflection;
-    
-    fitness = 0;
-
-    for (uint32_t rayno = 0; rayno < count_rays; rayno++)
-    {
-        // main (per ray) loop
-        for (uint32_t trino = 0; trino < shape_mesh.triangle_count; trino++)
-        {
-            // per triangle loop
-            blocked = false;
-            for (uint32_t obsno = 0; obsno < obstacle->triangle_count; obsno++)
-            {
-                // per obstacle triangle loop
-                if (rayMeetsObstacle(shape_mesh[trino].midpoint, rays[rayno], obstacle->mesh[obsno], true)) ///  optimization potential (?) - collides(...,..., obstacle->mesh)
-                { 
-                    blocked = true; // if a ray to the triangle is blocked then stop checking
-                    break;
-                }
-                // make sure the reflecting triangle faces the ray
-            }
-
-            if (blocked == false)    // ray not blocked: check the reflection
-            {   // check if reflected ray hits the obstacle
-                reflection = calculateReflection(shape_mesh[trino], rays[rayno]);
-                // std::cout << reflection.x << ' ' << reflection.y << ' ' << reflection.z << std::endl;
-                for (uint32_t obsno = 0; obsno < obstacle->triangle_count; obsno++)
-                {
-                    if(rayMeetsObstacle(shape_mesh[trino].midpoint, reflection, obstacle->mesh[obsno], false) == true)
-                    {
-                        // reflecting.push_back(shape_mesh[trino]);
-                        fitness +=  1;
-                        break;
-                    }
-                }
-            }
-
-        }
-    }
-}
-
-bool SolarCollector::rayTriangleIntersectSoA(
     double v0x, double v0y, double v0z,
     double v1x, double v1y, double v1z,
     double v2x, double v2y, double v2z,
@@ -249,7 +151,7 @@ bool SolarCollector::rayTriangleIntersectSoA(
     return false;
 }
 
-void SolarCollector::computeFitnessSoA(const std::vector<vertex>& rays) {
+void SolarCollector::computeFitness(const std::vector<vertex>& rays) {
     // fitness is based on the amount of `mesh` triangles that reflect the `ray` directly onto an `obstacle`
     // add bounding boxes to obstacle as it doesn't change (AABB, BVH, Slab method); even a BB that covers the whole obstacle would speed the process up significantly
 
@@ -261,8 +163,8 @@ void SolarCollector::computeFitnessSoA(const std::vector<vertex>& rays) {
     // 4. sum nonblocked reflections
 
 
-    const uint32_t obs_tri_count = obstacle2->triangle_count;
-    const uint32_t mesh_tri_count = shape_mesh2.triangle_count;
+    const uint32_t obs_tri_count = obstacle->triangle_count;
+    const uint32_t mesh_tri_count = shape_mesh.triangle_count;
 
     fitness = 0; // Reset fitness
 
@@ -273,7 +175,7 @@ void SolarCollector::computeFitnessSoA(const std::vector<vertex>& rays) {
         // --- Step 2 & 3: Iterate through *mesh* triangles ---
         for (uint32_t mesh_idx = 0; mesh_idx < mesh_tri_count; ++mesh_idx) {
             // 2.1 Calculate reflected ray for the *current mesh triangle*.
-            const vertex mesh_normal(shape_mesh2.normx[mesh_idx], shape_mesh2.normy[mesh_idx], shape_mesh2.normz[mesh_idx]); // Get precomputed normal
+            const vertex mesh_normal(shape_mesh.normx[mesh_idx], shape_mesh.normy[mesh_idx], shape_mesh.normz[mesh_idx]); // Get precomputed normal
 
             const vertex reflection = calculateReflection(mesh_normal, ray); // Simpler reflection calculation (see below)
 
@@ -290,11 +192,11 @@ void SolarCollector::computeFitnessSoA(const std::vector<vertex>& rays) {
                     
                     // Use a simplified ray-triangle intersection check (see below)
 
-                    if (rayTriangleIntersectSoA(
-                            obstacle2->v0x[obs_idx], obstacle2->v0y[obs_idx], obstacle2->v0z[obs_idx],
-                            obstacle2->v1x[obs_idx], obstacle2->v1y[obs_idx], obstacle2->v1z[obs_idx],
-                            obstacle2->v2x[obs_idx], obstacle2->v2y[obs_idx], obstacle2->v2z[obs_idx],
-                            shape_mesh2.midpx[mesh_idx], shape_mesh2.midpy[mesh_idx], shape_mesh2.midpz[mesh_idx], //PASS MIDPOINT
+                    if (rayTriangleIntersect(
+                            obstacle->v0x[obs_idx], obstacle->v0y[obs_idx], obstacle->v0z[obs_idx],
+                            obstacle->v1x[obs_idx], obstacle->v1y[obs_idx], obstacle->v1z[obs_idx],
+                            obstacle->v2x[obs_idx], obstacle->v2y[obs_idx], obstacle->v2z[obs_idx],
+                            shape_mesh.midpx[mesh_idx], shape_mesh.midpy[mesh_idx], shape_mesh.midpz[mesh_idx], //PASS MIDPOINT
                             ray,
                             true// Invert for initial block check (from mesh to obstacle)
                         ))
@@ -313,11 +215,11 @@ void SolarCollector::computeFitnessSoA(const std::vector<vertex>& rays) {
                 std::views::iota(0u, obs_tri_count).end(),
                 [&](uint32_t obs_idx) {
                     if (reflected_ray_hit) return;
-                    if (rayTriangleIntersectSoA(
-                        obstacle2->v0x[obs_idx], obstacle2->v0y[obs_idx], obstacle2->v0z[obs_idx],
-                        obstacle2->v1x[obs_idx], obstacle2->v1y[obs_idx], obstacle2->v1z[obs_idx],
-                        obstacle2->v2x[obs_idx], obstacle2->v2y[obs_idx], obstacle2->v2z[obs_idx],
-                        shape_mesh2.midpx[mesh_idx], shape_mesh2.midpy[mesh_idx], shape_mesh2.midpz[mesh_idx],  //PASS MIDPOINT
+                    if (rayTriangleIntersect(
+                        obstacle->v0x[obs_idx], obstacle->v0y[obs_idx], obstacle->v0z[obs_idx],
+                        obstacle->v1x[obs_idx], obstacle->v1y[obs_idx], obstacle->v1z[obs_idx],
+                        obstacle->v2x[obs_idx], obstacle->v2y[obs_idx], obstacle->v2z[obs_idx],
+                        shape_mesh.midpx[mesh_idx], shape_mesh.midpy[mesh_idx], shape_mesh.midpz[mesh_idx],  //PASS MIDPOINT
                         reflection,
                         false // Do *not* invert for reflection check
                     ))
@@ -338,51 +240,30 @@ void SolarCollector::computeMesh() {
     uint32_t i = 0;
     for (uint32_t y = 0; y < ysize - 1; y++) {
         for (uint32_t x = 0; x < xsize - 1; x++) {
-            shape_mesh[i].v[0].x = x;     shape_mesh[i].v[0].z = y;     shape_mesh[i].v[0].y = getXY(x, y);   // swapped coordinates
-            shape_mesh[i].v[1].x = x;     shape_mesh[i].v[1].z = y + 1; shape_mesh[i].v[1].y = getXY(x, y + 1);
-            shape_mesh[i].v[2].x = x + 1; shape_mesh[i].v[2].z = y;     shape_mesh[i].v[2].y = getXY(x + 1, y);
-            shape_mesh[i].normal = unitNormal(shape_mesh[i]);
-            shape_mesh[i].midpoint = tMidPoint(shape_mesh[i]);
+            shape_mesh.v0x[i] = x;     shape_mesh.v0z[i] = y;     shape_mesh.v0y[i] = getXY(x, y);   // swapped coordinates
+            shape_mesh.v1x[i] = x;     shape_mesh.v1z[i] = y + 1; shape_mesh.v1y[i] = getXY(x, y + 1);
+            shape_mesh.v2x[i] = x + 1; shape_mesh.v2z[i] = y;     shape_mesh.v2y[i] = getXY(x + 1, y);
             ++i;
 
-            shape_mesh[i].v[0].x = x + 1; shape_mesh[i].v[0].z = y + 1; shape_mesh[i].v[0].y = getXY(x + 1, y + 1);
-            shape_mesh[i].v[1].x = x + 1; shape_mesh[i].v[1].z = y;     shape_mesh[i].v[1].y = getXY(x + 1, y);
-            shape_mesh[i].v[2].x = x;     shape_mesh[i].v[2].z = y + 1; shape_mesh[i].v[2].y = getXY(x, y + 1);
-            shape_mesh[i].normal = unitNormal(shape_mesh[i]);
-            shape_mesh[i].midpoint = tMidPoint(shape_mesh[i]);
+            shape_mesh.v0x[i] = x + 1; shape_mesh.v0z[i] = y + 1; shape_mesh.v0y[i] = getXY(x + 1, y + 1);
+            shape_mesh.v1x[i] = x + 1; shape_mesh.v1z[i] = y;     shape_mesh.v1y[i] = getXY(x + 1, y);
+            shape_mesh.v2x[i] = x;     shape_mesh.v2z[i] = y + 1; shape_mesh.v2y[i] = getXY(x, y + 1);
             ++i;
         }
     }
-}
-
-void SolarCollector::computeMeshSoA() {
-    uint32_t i = 0;
-    for (uint32_t y = 0; y < ysize - 1; y++) {
-        for (uint32_t x = 0; x < xsize - 1; x++) {
-            shape_mesh2.v0x[i] = x;     shape_mesh2.v0z[i] = y;     shape_mesh2.v0y[i] = getXY(x, y);   // swapped coordinates
-            shape_mesh2.v1x[i] = x;     shape_mesh2.v1z[i] = y + 1; shape_mesh2.v1y[i] = getXY(x, y + 1);
-            shape_mesh2.v2x[i] = x + 1; shape_mesh2.v2z[i] = y;     shape_mesh2.v2y[i] = getXY(x + 1, y);
-            ++i;
-
-            shape_mesh2.v0x[i] = x + 1; shape_mesh2.v0z[i] = y + 1; shape_mesh2.v0y[i] = getXY(x + 1, y + 1);
-            shape_mesh2.v1x[i] = x + 1; shape_mesh2.v1z[i] = y;     shape_mesh2.v1y[i] = getXY(x + 1, y);
-            shape_mesh2.v2x[i] = x;     shape_mesh2.v2z[i] = y + 1; shape_mesh2.v2y[i] = getXY(x, y + 1);
-            ++i;
-        }
-    }
-    shape_mesh2.findNormals();
-    shape_mesh2.findCircumcentres();
+    shape_mesh.findNormals();
+    shape_mesh.findCircumcentres();
 }
 
 void SolarCollector::exportAsSTL(std::string name) {
     shape_mesh.exportSTL(name);
 }
 
-void SolarCollector::exportReflectionAsSTL() {
-    Mesh3d reflecting_mesh(static_cast<uint32_t>(reflecting.size()));
-    for (size_t i = 0; i < reflecting.size(); ++i) {
-        reflecting_mesh[static_cast<uint32_t>(i)] = reflecting[i];
-    }
+// void SolarCollector::exportReflectionAsSTL() {
+//     Mesh3d reflecting_mesh(static_cast<uint32_t>(reflecting.size()));
+//     for (size_t i = 0; i < reflecting.size(); ++i) {
+//         reflecting_mesh[static_cast<uint32_t>(i)] = reflecting[i];
+//     }
 
-    reflecting_mesh.exportSTL(std::to_string(id) + "_reflection.stl");
-}
+//     reflecting_mesh.exportSTL(std::to_string(id) + "_reflection.stl");
+// }

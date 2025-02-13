@@ -11,16 +11,13 @@ public:
     uint32_t ysize;
     uint32_t hmax;  // maximal height (dictated by max printing height)
 
-    Mesh3d shape_mesh; // mesh calculated from 'shape' member
-    Mesh3dSoA shape_mesh2; // mesh calculated from 'dna' member
+    Mesh3d shape_mesh; // mesh calculated from 'dna' member
 
     const Mesh3d* obstacle; // pointer to obstacle to read its mesh
-    const Mesh3dSoA* obstacle2; // pointer to obstacle to read its mesh
 
     std::vector<triangle> reflecting; // I think it's for checking the shape of the mesh built only from triangles that reflect the ray directly onto the obstacle - it's an overkill to store all triangles, just store bools or something
 
     SolarCollector (const uint32_t xs, const uint32_t ys, const uint32_t hm, const Mesh3d* obs);
-    SolarCollector (const uint32_t xs, const uint32_t ys, const uint32_t hm, const Mesh3dSoA* obs);
     SolarCollector (const SolarCollector & other);
     SolarCollector (SolarCollector&& other) noexcept;
     SolarCollector& operator= (SolarCollector&& other) noexcept;
@@ -35,12 +32,11 @@ public:
     // so when having a ray == (x, y, z) we can transform all the coordinates so that ray becomes (0, -1, 0) and the check for intersection is faster
     bool rayMeetsObstacle(const vertex& source, const vertex& ray, const triangle& target, bool invertRay);
     void computeFitness(const vertex* rays, const uint32_t count_rays);
-    bool rayTriangleIntersectSoA(double v0x, double v0y, double v0z, double v1x, double v1y, double v1z, double v2x, double v2y, double v2z, double sourcex, double sourcey, double sourcez, const vertex& ray, bool invertRay);
-    void computeFitnessSoA(const std::vector<vertex>& rays);
+    bool rayTriangleIntersect(double v0x, double v0y, double v0z, double v1x, double v1y, double v1z, double v2x, double v2y, double v2z, double sourcex, double sourcey, double sourcez, const vertex& ray, bool invertRay);
+    void computeFitness(const std::vector<vertex>& rays);
     void computeMesh();
-    void computeMeshSoA();
     void exportAsSTL(std::string name);
-    void exportReflectionAsSTL();
+    // void exportReflectionAsSTL();
 };
 
 

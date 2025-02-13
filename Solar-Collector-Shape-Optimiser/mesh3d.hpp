@@ -26,25 +26,6 @@ struct triangle {
 class Mesh3d {
 public:
     uint32_t triangle_count; // number of triangles in mesh
-    std::vector<triangle> mesh; // mesh consisting of multiple triangles
-
-    Mesh3d();
-    Mesh3d(const uint32_t triangle_count);
-    Mesh3d(const std::string filename);
-    Mesh3d (const Mesh3d& other); // copy constructor
-    ~Mesh3d();
-
-    triangle& operator[](const uint32_t index);
-    Mesh3d& operator= (const Mesh3d& other);
-
-    void moveXY(const double x, const double y);
-    void importSTL(const std::string filename);
-    void exportSTL(const std::string filename);
-};
-
-class Mesh3dSoA {
-public:
-    uint32_t triangle_count; // number of triangles in mesh
 
     // vertices defining triangles
     std::vector<double> v0x, v0y, v0z; // x, y, z components of v0 vertex
@@ -64,15 +45,15 @@ public:
     // TODO bounding box; make it recursive up to the depth of 4(?)
 
     // constructors and a destructor
-    Mesh3dSoA();
-    Mesh3dSoA(const uint32_t triangle_count);
-    Mesh3dSoA(const std::string filename);
-    Mesh3dSoA(const Mesh3dSoA& other); // copy constructor
-    ~Mesh3dSoA();
+    Mesh3d();
+    Mesh3d(const uint32_t triangle_count);
+    Mesh3d(const std::string filename);
+    Mesh3d(const Mesh3d& other); // copy constructor
+    ~Mesh3d();
 
     // overloaded operators
     // triangle& operator[](const uint32_t index);
-    Mesh3dSoA& operator= (const Mesh3dSoA& other);
+    Mesh3d& operator= (const Mesh3d& other);
 
     // methods
     void findCircumcentres();

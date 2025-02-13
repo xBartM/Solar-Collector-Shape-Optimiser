@@ -56,7 +56,7 @@ Genome& Genome::operator= (const Genome & other)
 
 Genome::~Genome() {}
 
-Genome Genome::crossoverAndMutateSoA(const Genome &other, double crossover_bias, double mutation_probability, double mutation_range) const {
+Genome Genome::crossoverAndMutate(const Genome &other, double crossover_bias, double mutation_probability, double mutation_range) const {
     Genome offspring(dna_size);
 
     // TODO: random device and distributions could be static (but that takes away the control to dynamically change them with each crossoverAnd.. call (can be passed to function))
