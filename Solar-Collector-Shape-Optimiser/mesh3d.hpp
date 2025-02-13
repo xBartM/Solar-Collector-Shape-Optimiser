@@ -39,7 +39,6 @@ public:
     // OPTIONAL: edges for finding intersections in with obstacle
     std::vector<double> e1x; std::vector<double> e1y; std::vector<double> e1z; // v1 - v0
     std::vector<double> e2x; std::vector<double> e2y; std::vector<double> e2z; // v2 - v0
-    std::vector<bool> obs_blocked;
 
 
     // TODO bounding box; make it recursive up to the depth of 4(?)

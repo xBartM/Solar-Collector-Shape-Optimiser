@@ -21,7 +21,6 @@ Mesh3d::Mesh3d(const uint32_t triangle_count)
     , midpx(triangle_count), midpy(triangle_count), midpz(triangle_count)
     , e1x(triangle_count), e1y(triangle_count), e1z(triangle_count)
     , e2x(triangle_count), e2y(triangle_count), e2z(triangle_count)
-    , obs_blocked(triangle_count)
 {}
 
 // Constructor from file (STL)
@@ -44,7 +43,6 @@ Mesh3d::Mesh3d(const std::string filename) {
         midpx.resize(triangle_count); midpy.resize(triangle_count); midpz.resize(triangle_count);
         e1x.resize(triangle_count); e1y.resize(triangle_count); e1z.resize(triangle_count);
         e2x.resize(triangle_count); e2y.resize(triangle_count); e2z.resize(triangle_count);
-        obs_blocked.resize(triangle_count);
 
         file.seekg(0, file.beg);    // return to beginning
         file.clear();               // clear flags (especially eof flag)
@@ -126,7 +124,6 @@ Mesh3d::Mesh3d(const Mesh3d& other)
     , midpx(other.midpx), midpy(other.midpy), midpz(other.midpz)
     , e1x(other.e1x), e1y(other.e1y), e1z(other.e1z)
     , e2x(other.e2x), e2y(other.e2y), e2z(other.e2z)
-    , obs_blocked(other.obs_blocked)
 {}
 
 Mesh3d::~Mesh3d() {}
@@ -143,7 +140,6 @@ Mesh3d& Mesh3d::operator=(const Mesh3d& other) {
         midpx = other.midpx; midpy = other.midpy; midpz = other.midpz;
         e1x = other.e1x; e1y = other.e1y; e1z = other.e1z;
         e2x = other.e2x; e2y = other.e2y; e2z = other.e2z;
-        obs_blocked = other.obs_blocked;
     }
     return *this;
 }
@@ -434,7 +430,6 @@ void Mesh3d::findEdges() {
     // resize vectors to acces via operator[]
     e1x.resize(triangle_count); e1y.resize(triangle_count); e1z.resize(triangle_count);
     e2x.resize(triangle_count); e2y.resize(triangle_count); e2z.resize(triangle_count);
-    obs_blocked.resize(triangle_count);
 
     // Precompute obstacle edges
     std::for_each(std::execution::par_unseq,
