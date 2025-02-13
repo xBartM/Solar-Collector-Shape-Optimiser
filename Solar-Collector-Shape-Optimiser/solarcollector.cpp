@@ -93,61 +93,56 @@ void SolarCollector::showYourself() {
     }
 }
 
-
-bool SolarCollector::rayTriangleIntersect(
-    // Moller–Trumbore intersection algorithm - I think
-
-    double v0x, double v0y, double v0z,
-    double v1x, double v1y, double v1z,
-    double v2x, double v2y, double v2z,
-    double sourcex, double sourcey, double sourcez,
-    const vertex& ray, bool invertRay) {
-
+bool SolarCollector::rayObstacleHit(const double& sourcex, const double& sourcey, const double& sourcez, 
+                                    const vertex& ray, bool invertRay) {
     const double EPSILON = 0.0000001;
-
-    // Pre-calculated edges are now class members (obs_edge1, obs_edge2)
-    double edge1x = v1x - v0x;
-    double edge1y = v1y - v0y;
-    double edge1z = v1z - v0z;
-
-    double edge2x = v2x - v0x;
-    double edge2y = v2y - v0y;
-    double edge2z = v2z - v0z;
+    const uint32_t obs_tri_count = obstacle->triangle_count;
 
     const vertex usedRay = invertRay ? vertex{-ray.x, -ray.y, -ray.z} : ray;
 
-    double hx = usedRay.y * edge2z - usedRay.z * edge2y;
-    double hy = usedRay.z * edge2x - usedRay.x * edge2z;
-    double hz = usedRay.x * edge2y - usedRay.y * edge2x;
+    for (uint32_t obs_idx = 0; obs_idx < obs_tri_count; ++obs_idx) {
+        
+        // Use a simplified ray-triangle intersection check (see below)
 
-    double a = edge1x * hx + edge1y * hy + edge1z * hz;
+        // Pre-calculated edges are now class members (obs_edge1, obs_edge2)
+        const double edge1x = obstacle->e1x[obs_idx];
+        const double edge1y = obstacle->e1y[obs_idx];
+        const double edge1z = obstacle->e1z[obs_idx];
 
-    if (a > -EPSILON && a < EPSILON)
-        return false;    // This ray is parallel to this triangle.
+        const double edge2x = obstacle->e2x[obs_idx];
+        const double edge2y = obstacle->e2y[obs_idx];
+        const double edge2z = obstacle->e2z[obs_idx];
 
-    double f = 1.0 / a;
-    double sx = sourcex - v0x;
-    double sy = sourcey - v0y;
-    double sz = sourcez - v0z;
+        const double hx = usedRay.y * edge2z - usedRay.z * edge2y;
+        const double hy = usedRay.z * edge2x - usedRay.x * edge2z;
+        const double hz = usedRay.x * edge2y - usedRay.y * edge2x;
 
-    double u = f * (sx * hx + sy * hy + sz * hz);
-    if (u < 0.0 || u > 1.0)
-        return false;
+        const double a = edge1x * hx + edge1y * hy + edge1z * hz;
 
-    double qx = sy * edge1z - sz * edge1y;
-    double qy = sz * edge1x - sx * edge1z;
-    double qz = sx * edge1y - sy * edge1x;
+        if (a > -EPSILON && a < EPSILON)
+            continue;    // This ray is parallel to this triangle.
 
-    double v = f * (usedRay.x * qx + usedRay.y * qy + usedRay.z * qz);
-    if (v < 0.0 || u + v > 1.0)
-        return false;
+        const double f = 1.0 / a;
+        const double sx = sourcex - obstacle->v0x[obs_idx];
+        const double sy = sourcey - obstacle->v0y[obs_idx];
+        const double sz = sourcez - obstacle->v0z[obs_idx];
 
-    double t = f * (edge2x * qx + edge2y * qy + edge2z * qz);
-    if (t > EPSILON) // ray intersection
-    {
-        return true;
+        const double u = f * (sx * hx + sy * hy + sz * hz);
+        if (u < 0.0 || u > 1.0)
+            continue;
+
+        const double qx = sy * edge1z - sz * edge1y;
+        const double qy = sz * edge1x - sx * edge1z;
+        const double qz = sx * edge1y - sy * edge1x;
+
+        const double v = f * (usedRay.x * qx + usedRay.y * qy + usedRay.z * qz);
+        if (v < 0.0 || u + v > 1.0)
+            continue;
+
+        const double t = f * (edge2x * qx + edge2y * qy + edge2z * qz);
+        if (t > EPSILON) // ray intersection
+            return true;
     }
-
     return false;
 }
 
@@ -155,15 +150,6 @@ void SolarCollector::computeFitness(const std::vector<vertex>& rays) {
     // fitness is based on the amount of `mesh` triangles that reflect the `ray` directly onto an `obstacle`
     // add bounding boxes to obstacle as it doesn't change (AABB, BVH, Slab method); even a BB that covers the whole obstacle would speed the process up significantly
 
-    // go through all rays
-    // 1. compute if source ray intersects an obstacle
-    // obstacle is the target
-    // 2. compute reflected rays vector for every mesh triangle
-    // 3. compute if relfected ray intersects an obstacle
-    // 4. sum nonblocked reflections
-
-
-    const uint32_t obs_tri_count = obstacle->triangle_count;
     const uint32_t mesh_tri_count = shape_mesh.triangle_count;
 
     fitness = 0; // Reset fitness
@@ -180,58 +166,18 @@ void SolarCollector::computeFitness(const std::vector<vertex>& rays) {
             const vertex reflection = calculateReflection(mesh_normal, ray); // Simpler reflection calculation (see below)
 
 
-            // --- Step 4: Check against *all obstacle triangles* (in parallel) ---
-            bool obstacle_hit = false;
-            
-            // Use std::for_each with parallel execution
-            std::for_each(std::execution::par_unseq,
-                std::views::iota(0u, obs_tri_count).begin(),
-                std::views::iota(0u, obs_tri_count).end(),
-                [&](uint32_t obs_idx) {
-                    if (obstacle_hit) return;
-                    
-                    // Use a simplified ray-triangle intersection check (see below)
-
-                    if (rayTriangleIntersect(
-                            obstacle->v0x[obs_idx], obstacle->v0y[obs_idx], obstacle->v0z[obs_idx],
-                            obstacle->v1x[obs_idx], obstacle->v1y[obs_idx], obstacle->v1z[obs_idx],
-                            obstacle->v2x[obs_idx], obstacle->v2y[obs_idx], obstacle->v2z[obs_idx],
-                            shape_mesh.midpx[mesh_idx], shape_mesh.midpy[mesh_idx], shape_mesh.midpz[mesh_idx], //PASS MIDPOINT
-                            ray,
-                            true// Invert for initial block check (from mesh to obstacle)
-                        ))
-                        {
-                            obstacle_hit = true;
-                        } 
-                }
-            );
-
-            if (obstacle_hit) continue;
+            // --- Step 4: Check against *all obstacle triangles* ---
+            // if ray hits (is blocked by) the obstacle continue to the next mesh triangle
+            if (rayObstacleHit(shape_mesh.midpx[mesh_idx], shape_mesh.midpy[mesh_idx], shape_mesh.midpz[mesh_idx], ray, true)) {
+                continue;
+            }
 
             // Check against all obstacle triangles (for reflected rays)
-            bool reflected_ray_hit = false;
-             std::for_each(std::execution::par_unseq,
-                std::views::iota(0u, obs_tri_count).begin(),
-                std::views::iota(0u, obs_tri_count).end(),
-                [&](uint32_t obs_idx) {
-                    if (reflected_ray_hit) return;
-                    if (rayTriangleIntersect(
-                        obstacle->v0x[obs_idx], obstacle->v0y[obs_idx], obstacle->v0z[obs_idx],
-                        obstacle->v1x[obs_idx], obstacle->v1y[obs_idx], obstacle->v1z[obs_idx],
-                        obstacle->v2x[obs_idx], obstacle->v2y[obs_idx], obstacle->v2z[obs_idx],
-                        shape_mesh.midpx[mesh_idx], shape_mesh.midpy[mesh_idx], shape_mesh.midpz[mesh_idx],  //PASS MIDPOINT
-                        reflection,
-                        false // Do *not* invert for reflection check
-                    ))
-                    {
-                            reflected_ray_hit = true;
-                    }
-               });
-
-            // Update fitness
-            if(reflected_ray_hit){
-                fitness += 1; // Increment fitness for each successful hit.
+            // if reflected ray hits the obstacle increment fitness
+            if (rayObstacleHit(shape_mesh.midpx[mesh_idx], shape_mesh.midpy[mesh_idx], shape_mesh.midpz[mesh_idx], reflection, false)) {
+                fitness += 1;
             }
+
         }
     }
 }

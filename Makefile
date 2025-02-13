@@ -2,10 +2,14 @@
 CXX = g++
 
 # Compiler flags (added -I for include directory)
-CXXFLAGS = -std=c++23 -Wall -Wextra -pedantic -fopenmp -I.
+CXXFLAGS = -std=c++23 -Wall -Wextra -pedantic -I.
+LDFLAGS = -ltbb
 # Use '-g' to generate debug information, or '-O3' for optimization
 CXXFLAGS += -pg -g
-# CXXFLAGS += -O2
+# CXXFLAGS += -pthread
+# CXXFLAGS += -fopenmp
+# CXXFLAGS += -ftree-parallelize-loops=4
+CXXFLAGS += -O2
 # CXXFLAGS += -O3
 # Output executable name
 TARGET = solar_optimiser
@@ -25,7 +29,7 @@ all: $(TARGET)
 
 # Rule to build the executable
 $(TARGET): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(TARGET) $(LDFLAGS)
 
 # Rule to build object files (note the -I flag for header files)
 Solar-Collector-Shape-Optimiser/%.o: Solar-Collector-Shape-Optimiser/%.cpp

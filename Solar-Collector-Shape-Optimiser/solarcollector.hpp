@@ -30,9 +30,8 @@ public:
     
     // when having a ray == (0, -1, 0) we can remove all the triangles that are not in the plane
     // so when having a ray == (x, y, z) we can transform all the coordinates so that ray becomes (0, -1, 0) and the check for intersection is faster
-    bool rayMeetsObstacle(const vertex& source, const vertex& ray, const triangle& target, bool invertRay);
     void computeFitness(const vertex* rays, const uint32_t count_rays);
-    bool rayTriangleIntersect(double v0x, double v0y, double v0z, double v1x, double v1y, double v1z, double v2x, double v2y, double v2z, double sourcex, double sourcey, double sourcez, const vertex& ray, bool invertRay);
+    bool rayObstacleHit(const double& sourcex, const double& sourcey, const double& sourcez, const vertex& ray, bool invertRay);
     void computeFitness(const std::vector<vertex>& rays);
     void computeMesh();
     void exportAsSTL(std::string name);

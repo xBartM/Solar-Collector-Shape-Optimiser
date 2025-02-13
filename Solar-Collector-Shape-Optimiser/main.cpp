@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
+#include <execution>
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
@@ -39,9 +40,9 @@ int main (int argc, char** argv)
         popsize = stoul(argv[4]);
     } else {
         xsize   = 180+1;    // size of printbed (minus some spare space)
-        ysize   = 94+1;    // length of aluminum rod
+        ysize   = 940+1;    // length of aluminum rod
         hmax    = 180+1;    // height of printbed (minus some spare space)
-        popsize = 4;       // make popsize divisible by 4 xd
+        popsize = 40;       // make popsize divisible by 4 xd
     }
 
     random_device rd;
@@ -95,12 +96,12 @@ int main (int argc, char** argv)
 
     while (true)
     {
-        #pragma omp parallel for num_threads(4)
-        for (auto pop = population.rbegin(); pop != population.rend(); pop++)
-            if (pop->fitness == 0)
-                pop->computeFitness(rays);
-                // else cout << "skipped" << endl;
-            // pop.exportReflectionsAsSTL(); // ??
+
+        std::for_each(std::execution::par_unseq, population.begin(), population.end(), [&](auto& pop) {
+            if (pop.fitness == 0) {
+                pop.computeFitness(rays);
+            }
+        });
 
         #ifdef MAIN_TIMED
         end = chrono::high_resolution_clock::now();
@@ -197,7 +198,6 @@ void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint3
 
     for (double i = 0.0; i <= (double)hmax; i+=(double)hmax/(double)test_batches)//i+=0.0025)
     {
-        #pragma omp parallel for num_threads(4)
         for (auto pop = seed.begin(); pop != seed.end(); pop++)
         {
             for (uint32_t j = 0; j < xsize*ysize; j++)
