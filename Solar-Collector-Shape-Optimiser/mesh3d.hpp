@@ -59,7 +59,7 @@ public:
     void findNormals();
     void findEdges();
     void moveXY(const double& x, const double& y);
-    void exportSTL(const std::string filename);
+    void exportSTL(const std::string& filename);
 };
 
 vertex xProduct(const vertex& a, const vertex& b);
@@ -73,5 +73,8 @@ vertex unitNormal(const triangle& t);
 vertex tMidPoint(const triangle& t);
 vertex calculateReflection(const triangle& t, const vertex& ray);
 vertex calculateReflection(const vertex& normal, const vertex& ray);
+
+Mesh3d importSTL(const std::string& filename);
+
 
 #endif // MESH3D

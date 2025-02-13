@@ -24,125 +24,14 @@ Mesh3d::Mesh3d(const uint32_t triangle_count)
 {}
 
 // Constructor from file (STL)
-Mesh3d::Mesh3d(const std::string filename) {
-    std::string line;
-    std::ifstream file(filename, std::ifstream::in);
-
-    size_t pos;
-
-    if (file.is_open()) {
-        triangle_count = std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
-        triangle_count -= 2;
-        triangle_count /= 7;
-
-        // Resize to access elements via operator[]
-        v0x.resize(triangle_count); v0y.resize(triangle_count); v0z.resize(triangle_count);
-        v1x.resize(triangle_count); v1y.resize(triangle_count); v1z.resize(triangle_count); 
-        v2x.resize(triangle_count); v2y.resize(triangle_count); v2z.resize(triangle_count);
-        normx.resize(triangle_count); normy.resize(triangle_count); normz.resize(triangle_count);
-        midpx.resize(triangle_count); midpy.resize(triangle_count); midpz.resize(triangle_count);
-        e1x.resize(triangle_count); e1y.resize(triangle_count); e1z.resize(triangle_count);
-        e2x.resize(triangle_count); e2y.resize(triangle_count); e2z.resize(triangle_count);
-
-        file.seekg(0, file.beg);    // return to beginning
-        file.clear();               // clear flags (especially eof flag)
-
-        std::getline(file, line);   // skip the name of the solid
-        std::getline(file, line);   // get the "facet normal" line ready
-
-        for (int i = 0; line.find("endsolid") == std::string::npos; i++) { // read untill you find "endsolid";
-            // get normal
-            pos = line.rfind(' ');      // find last ' '
-            normz[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            normy[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            normx[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-
-            std::getline(file, line);   // skip the "outer loop" line
-                
-            // vertex 0
-            std::getline(file, line);   // get the first "vertex" line ready
-            pos = line.rfind(' ');      // find last ' '
-            v0z[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            v0y[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            v0x[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-
-            // vertex 1
-            std::getline(file, line);   // get the second "vertex" line ready
-            pos = line.rfind(' ');      // find last ' '
-            v1z[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            v1y[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            v1x[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-
-            // vertex 2
-            std::getline(file, line);   // get the third "vertex" line ready
-            pos = line.rfind(' ');      // find last ' '
-            v2z[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            v2y[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            v2x[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-
-
-            std::getline(file, line);   // skip "endloop"
-            std::getline(file, line);   // skip "endfacet"
-
-            std::getline(file, line);   // get the "facet normal" line ready (or "endsolid" line)
-            
-        }
-        file.close();
-
-        findCircumcentres();
-    }
-
+Mesh3d::Mesh3d(const std::string filename) 
+    : Mesh3d(importSTL(filename))
+{
+    findCircumcentres();
+    findEdges();
 }
 
-// Mesh3d::Mesh3d(const Mesh3d& other) 
-//     : triangle_count(other.triangle_count) 
-//     // Copy all vector data.  Use assignment operator= for vectors.
-//     , v0x(other.v0x), v0y(other.v0y), v0z(other.v0z)
-//     , v1x(other.v1x), v1y(other.v1y), v1z(other.v1z)
-//     , v2x(other.v2x), v2y(other.v2y), v2z(other.v2z)
-//     , normx(other.normx), normy(other.normy), normz(other.normz)
-//     , midpx(other.midpx), midpy(other.midpy), midpz(other.midpz)
-//     , e1x(other.e1x), e1y(other.e1y), e1z(other.e1z)
-//     , e2x(other.e2x), e2y(other.e2y), e2z(other.e2z)
-// {}
-
 Mesh3d::~Mesh3d() {}
-
-// Assignment operator
-// Mesh3d& Mesh3d::operator=(const Mesh3d& other) {
-//     if (this != &other) { // Protect against self-assignment
-//         triangle_count = other.triangle_count;
-
-//         v0x = other.v0x; v0y = other.v0y; v0z = other.v0z;
-//         v1x = other.v1x; v1y = other.v1y; v1z = other.v1z;
-//         v2x = other.v2x; v2y = other.v2y; v2z = other.v2z;
-//         normx = other.normx; normy = other.normy; normz = other.normz;
-//         midpx = other.midpx; midpy = other.midpy; midpz = other.midpz;
-//         e1x = other.e1x; e1y = other.e1y; e1z = other.e1z;
-//         e2x = other.e2x; e2y = other.e2y; e2z = other.e2z;
-//     }
-//     return *this;
-// }
 
 void Mesh3d::moveXY(const double& x, const double& y) {
     // Use std::for_each with std::execution::par_unseq for parallel execution.
@@ -168,89 +57,10 @@ void Mesh3d::moveXY(const double& x, const double& y) {
     std::for_each(std::execution::par_unseq, midpy.begin(), midpy.end(), translate_y);
 
     // Do NOT transform normals.  Normals represent direction and are invariant under translation.
+    findEdges();
 }
-/*
-void Mesh3d::importSTL(const std::string filename) {
-    std::string line;
-    std::ifstream file(filename, std::ifstream::in);
 
-    size_t pos;
-
-    if (file.is_open()) {
-        triangle_count = std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
-        triangle_count -= 2;
-        triangle_count /= 7;
-
-        mesh.resize(triangle_count);
-
-        file.seekg(0, file.beg);    // return to beginning
-        file.clear();               // clear flags (especially eof flag)
-
-        std::getline(file, line);   // skip the name of the solid
-        std::getline(file, line);   // get the "facet normal" line ready
-
-        for (int i = 0; line.find("endsolid") == std::string::npos; i++) { // read untill you find "endsolid";
-            // get normal
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].normal.z = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].normal.y = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].normal.x = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-
-            std::getline(file, line);   // skip the "outer loop" line
-                
-            // vertex 0
-            std::getline(file, line);   // get the first "vertex" line ready
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].v[0].z = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].v[0].y = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].v[0].x = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-
-            // vertex 1
-            std::getline(file, line);   // get the second "vertex" line ready
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].v[1].z = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].v[1].y = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].v[1].x = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-
-            // vertex 2
-            std::getline(file, line);   // get the third "vertex" line ready
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].v[2].z = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].v[2].y = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-            pos = line.rfind(' ');      // find last ' '
-            mesh[i].v[2].x = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
-            line = line.substr(0, pos);
-
-
-            std::getline(file, line);   // skip "endloop"
-            std::getline(file, line);   // skip "endfacet"
-
-            std::getline(file, line);   // get the "facet normal" line ready (or "endsolid" line)
-            
-        }
-        file.close();
-    }
-}
-*/
-void Mesh3d::exportSTL(const std::string filename) {
+void Mesh3d::exportSTL(const std::string& filename) {
     std::ofstream stlout(filename, std::ofstream::trunc); // open file in a constructor, will be closed by destructor
     std::stringstream stlmem; // Build the entire string in memory
 
@@ -451,9 +261,6 @@ void Mesh3d::findEdges() {
 vertex calculateReflection(const triangle& t, const vertex& ray) {
     return calculateReflection(unitNormal(t), ray);
 
-    // const vertex invray(substract(vertex(0, 0, 0), ray));
-    // return substract(multiply(t.normal, 2 * dotProduct(t.normal, invray)), invray);
-
 }
 
 vertex calculateReflection(const vertex& normal, const vertex& ray) {
@@ -463,3 +270,86 @@ vertex calculateReflection(const vertex& normal, const vertex& ray) {
                   ray.y - 2.0 * dot * normal.y,
                   ray.z - 2.0 * dot * normal.z};
 }
+
+Mesh3d importSTL(const std::string& filename) {
+    std::string line;
+    std::ifstream file(filename, std::ifstream::in);
+
+    size_t pos;
+    uint32_t triangle_count;
+
+    if (!file.is_open()) return Mesh3d();
+
+    triangle_count = std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
+    triangle_count -= 2;
+    triangle_count /= 7;
+
+    Mesh3d ret(triangle_count);
+
+    file.seekg(0, file.beg);    // return to beginning
+    file.clear();               // clear flags (especially eof flag)
+
+    std::getline(file, line);   // skip the name of the solid
+    std::getline(file, line);   // get the "facet normal" line ready
+
+    for (int i = 0; line.find("endsolid") == std::string::npos; i++) { // read untill you find "endsolid";
+        // get normal
+        pos = line.rfind(' ');      // find last ' '
+        ret.normz[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+        pos = line.rfind(' ');      // find last ' '
+        ret.normy[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+        pos = line.rfind(' ');      // find last ' '
+        ret.normx[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+
+        std::getline(file, line);   // skip the "outer loop" line
+            
+        // vertex 0
+        std::getline(file, line);   // get the first "vertex" line ready
+        pos = line.rfind(' ');      // find last ' '
+        ret.v0z[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+        pos = line.rfind(' ');      // find last ' '
+        ret.v0y[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+        pos = line.rfind(' ');      // find last ' '
+        ret.v0x[i] = strtod(line.substr(pos + 1, std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+
+        // vertex 1
+        std::getline(file, line);   // get the second "vertex" line ready
+        pos = line.rfind(' ');      // find last ' '
+        ret.v1z[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+        pos = line.rfind(' ');      // find last ' '
+        ret.v1y[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+        pos = line.rfind(' ');      // find last ' '
+        ret.v1x[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+
+        // vertex 2
+        std::getline(file, line);   // get the third "vertex" line ready
+        pos = line.rfind(' ');      // find last ' '
+        ret.v2z[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+        pos = line.rfind(' ');      // find last ' '
+        ret.v2y[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+        pos = line.rfind(' ');      // find last ' '
+        ret.v2x[i] = strtod(line.substr(pos+1,std::string::npos).c_str(), nullptr);
+        line = line.substr(0, pos);
+
+
+        std::getline(file, line);   // skip "endloop"
+        std::getline(file, line);   // skip "endfacet"
+
+        std::getline(file, line);   // get the "facet normal" line ready (or "endsolid" line)
+        
+    }
+
+    return ret;
+}
+

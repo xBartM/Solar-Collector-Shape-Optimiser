@@ -58,7 +58,6 @@ int main (int argc, char** argv)
     // obs2 should be const
     Mesh3d obs("obstacle.stl");
     obs.moveXY((xsize-1.0)/2.0, (hmax-1.0)/2.0);
-    obs.findEdges(); // needed later for Moller-.. intersection algorithm
     //obs.exportSTL("my_obstacle.stl");
 
     #ifdef MAIN_TIMED
