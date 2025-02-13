@@ -45,14 +45,14 @@ public:
 
     // constructors and a destructor
     Mesh3d();
-    Mesh3d(const uint32_t triangle_count);
+    explicit Mesh3d(const uint32_t triangle_count);
     Mesh3d(const std::string filename);
-    Mesh3d(const Mesh3d& other); // copy constructor
+    // Mesh3d(const Mesh3d& other); // copy constructor can be defualt
     ~Mesh3d();
 
     // overloaded operators
     // triangle& operator[](const uint32_t index);
-    Mesh3d& operator= (const Mesh3d& other);
+    // Mesh3d& operator= (const Mesh3d& other); // operator= can be default
 
     // methods
     void findCircumcentres();

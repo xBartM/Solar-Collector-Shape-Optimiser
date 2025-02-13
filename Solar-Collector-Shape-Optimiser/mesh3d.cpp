@@ -9,7 +9,7 @@
 
 
 Mesh3d::Mesh3d() 
-    : triangle_count(0) 
+    : Mesh3d(0) 
 {}
 
 Mesh3d::Mesh3d(const uint32_t triangle_count) 
@@ -114,35 +114,35 @@ Mesh3d::Mesh3d(const std::string filename) {
 
 }
 
-Mesh3d::Mesh3d(const Mesh3d& other) 
-    : triangle_count(other.triangle_count) 
-    // Copy all vector data.  Use assignment operator= for vectors.
-    , v0x(other.v0x), v0y(other.v0y), v0z(other.v0z)
-    , v1x(other.v1x), v1y(other.v1y), v1z(other.v1z)
-    , v2x(other.v2x), v2y(other.v2y), v2z(other.v2z)
-    , normx(other.normx), normy(other.normy), normz(other.normz)
-    , midpx(other.midpx), midpy(other.midpy), midpz(other.midpz)
-    , e1x(other.e1x), e1y(other.e1y), e1z(other.e1z)
-    , e2x(other.e2x), e2y(other.e2y), e2z(other.e2z)
-{}
+// Mesh3d::Mesh3d(const Mesh3d& other) 
+//     : triangle_count(other.triangle_count) 
+//     // Copy all vector data.  Use assignment operator= for vectors.
+//     , v0x(other.v0x), v0y(other.v0y), v0z(other.v0z)
+//     , v1x(other.v1x), v1y(other.v1y), v1z(other.v1z)
+//     , v2x(other.v2x), v2y(other.v2y), v2z(other.v2z)
+//     , normx(other.normx), normy(other.normy), normz(other.normz)
+//     , midpx(other.midpx), midpy(other.midpy), midpz(other.midpz)
+//     , e1x(other.e1x), e1y(other.e1y), e1z(other.e1z)
+//     , e2x(other.e2x), e2y(other.e2y), e2z(other.e2z)
+// {}
 
 Mesh3d::~Mesh3d() {}
 
 // Assignment operator
-Mesh3d& Mesh3d::operator=(const Mesh3d& other) {
-    if (this != &other) { // Protect against self-assignment
-        triangle_count = other.triangle_count;
+// Mesh3d& Mesh3d::operator=(const Mesh3d& other) {
+//     if (this != &other) { // Protect against self-assignment
+//         triangle_count = other.triangle_count;
 
-        v0x = other.v0x; v0y = other.v0y; v0z = other.v0z;
-        v1x = other.v1x; v1y = other.v1y; v1z = other.v1z;
-        v2x = other.v2x; v2y = other.v2y; v2z = other.v2z;
-        normx = other.normx; normy = other.normy; normz = other.normz;
-        midpx = other.midpx; midpy = other.midpy; midpz = other.midpz;
-        e1x = other.e1x; e1y = other.e1y; e1z = other.e1z;
-        e2x = other.e2x; e2y = other.e2y; e2z = other.e2z;
-    }
-    return *this;
-}
+//         v0x = other.v0x; v0y = other.v0y; v0z = other.v0z;
+//         v1x = other.v1x; v1y = other.v1y; v1z = other.v1z;
+//         v2x = other.v2x; v2y = other.v2y; v2z = other.v2z;
+//         normx = other.normx; normy = other.normy; normz = other.normz;
+//         midpx = other.midpx; midpy = other.midpy; midpz = other.midpz;
+//         e1x = other.e1x; e1y = other.e1y; e1z = other.e1z;
+//         e2x = other.e2x; e2y = other.e2y; e2z = other.e2z;
+//     }
+//     return *this;
+// }
 
 void Mesh3d::moveXY(const double& x, const double& y) {
     // Use std::for_each with std::execution::par_unseq for parallel execution.
