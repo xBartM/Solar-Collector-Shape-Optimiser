@@ -59,7 +59,7 @@ public:
     void findNormals();
     void findEdges();
     void moveXY(const double& x, const double& y);
-    void exportSTL(const std::string& filename);
+    void exportSTL(const std::string& filename) const;
 };
 
 vertex xProduct(const vertex& a, const vertex& b);

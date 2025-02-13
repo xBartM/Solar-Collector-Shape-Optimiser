@@ -60,7 +60,7 @@ SolarCollector& SolarCollector::operator= (const SolarCollector & other)
     ysize = other.ysize;
     hmax = other.hmax;
 
-    shape_mesh = Mesh3d(other.shape_mesh); // we can use Mesh3d operator=
+    shape_mesh = other.shape_mesh; // we can use Mesh3d operator=
 
     obstacle = other.obstacle;
  
@@ -84,7 +84,7 @@ void SolarCollector::setXY(const uint32_t x, const uint32_t y, const double val)
         dna[y * xsize + x] = val;
 }
 
-void SolarCollector::showYourself() {
+void SolarCollector::showYourself() const {
     std::cout << id << " " << xsize << " " << ysize << std::endl;
     for (uint32_t y = 0; y < ysize; y++) {
         for (uint32_t x = 0; x < xsize; x++)
@@ -94,7 +94,7 @@ void SolarCollector::showYourself() {
 }
 
 bool SolarCollector::rayObstacleHit(const double& sourcex, const double& sourcey, const double& sourcez, 
-                                    const vertex& ray, bool invertRay) {
+                                    const vertex& ray, bool invertRay) const {
     const double EPSILON = 0.0000001;
     const uint32_t obs_tri_count = obstacle->triangle_count;
 
@@ -201,7 +201,7 @@ void SolarCollector::computeMesh() {
     shape_mesh.findCircumcentres();
 }
 
-void SolarCollector::exportAsSTL(std::string name) {
+void SolarCollector::exportAsSTL(std::string name) const {
     shape_mesh.exportSTL(name);
 }
 

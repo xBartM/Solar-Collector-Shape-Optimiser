@@ -110,7 +110,7 @@ int main (int argc, char** argv)
         start = chrono::high_resolution_clock::now();
         #endif // MAIN_TIMED
 
-        sort(population.begin(), population.end()); // WRONG WAY (but it works - i think even better.. 2gen max 15k...) // sorted best to worst
+        sort(population.begin(), population.end(), std::greater<>()); // sorted best to worst
 
         cout << to_string(generation);
         for (auto pop = population.begin(); pop != population.end(); pop++)
@@ -146,7 +146,7 @@ int main (int argc, char** argv)
 
             // Use the crossoverAndMutate method from the Genome class
             // auto offspring = pop->crossoverAndMutate(*(pop + 1), 60.0, 5.0, 0.225);
-            auto offspring = pop->crossoverAndMutate(*(pop + 1), 0.6, 0.05, 0.225);
+            auto offspring = pop->crossoverAndMutate(*(pop + 1), 0.6, 0.05, 0.225); // this is wrong - choose parents at random (?)
 
             // Convert Genome to SolarCollector (assuming constructor compatibility)
             SolarCollector child(xsize, ysize, hmax, &obs);

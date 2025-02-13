@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -std=c++23 -Wall -Wextra -pedantic -I.
 LDFLAGS = -ltbb
 # Use '-g' to generate debug information, or '-O3' for optimization
-CXXFLAGS += -pg -g
+# CXXFLAGS += -pg -g
 # CXXFLAGS += -pthread
 # CXXFLAGS += -fopenmp
 # CXXFLAGS += -ftree-parallelize-loops=4

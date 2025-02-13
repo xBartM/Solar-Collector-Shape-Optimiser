@@ -26,15 +26,14 @@ public:
 
     double getXY(const uint32_t x, const uint32_t y) const;
     void setXY(const uint32_t x, const uint32_t y, const double val);
-    void showYourself();
+    void showYourself() const;
     
     // when having a ray == (0, -1, 0) we can remove all the triangles that are not in the plane
     // so when having a ray == (x, y, z) we can transform all the coordinates so that ray becomes (0, -1, 0) and the check for intersection is faster
-    void computeFitness(const vertex* rays, const uint32_t count_rays);
-    bool rayObstacleHit(const double& sourcex, const double& sourcey, const double& sourcez, const vertex& ray, bool invertRay);
+    bool rayObstacleHit(const double& sourcex, const double& sourcey, const double& sourcez, const vertex& ray, bool invertRay) const;
     void computeFitness(const std::vector<vertex>& rays);
     void computeMesh();
-    void exportAsSTL(std::string name);
+    void exportAsSTL(std::string name) const;
     // void exportReflectionAsSTL();
 };
 

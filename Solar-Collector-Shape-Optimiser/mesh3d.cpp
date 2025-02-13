@@ -60,7 +60,7 @@ void Mesh3d::moveXY(const double& x, const double& y) {
     findEdges();
 }
 
-void Mesh3d::exportSTL(const std::string& filename) {
+void Mesh3d::exportSTL(const std::string& filename) const {
     std::ofstream stlout(filename, std::ofstream::trunc); // open file in a constructor, will be closed by destructor
     std::stringstream stlmem; // Build the entire string in memory
 
