@@ -52,6 +52,7 @@ int main (int argc, char** argv)
         xsize   = 180+1;    // size of printbed (minus some spare space)
         ysize   = 940+1;    // length of aluminum rod
         hmax    = 180+1;    // height of printbed (minus some spare space)
+        // popsize = 200;       // make popsize divisible by 4 xd
         popsize = 40;       // make popsize divisible by 4 xd
     }
 
@@ -69,28 +70,33 @@ int main (int argc, char** argv)
 
     // findProperHmaxDist(xsize, ysize, hmax, &obs);
 
-    // create a population
+    // create a population and a pointer to each index
     std::vector<SolarCollector> population;
-    population.reserve(popsize); // reserve space to avoid reallocations
+    std::vector<uint32_t> pop_idx;
+    // reserve space to avoid reallocations
+    population.reserve(popsize); 
+    pop_idx.reserve(popsize); 
     for (uint32_t i = 0, j = 0; i < popsize; i++, j++) {
         population.emplace_back(xsize, ysize, hmax, &obs);
         for (uint32_t k = 0; k < xsize*ysize; k++)
             population[i].setXY(k, 0, hdist(mt));
         population[i].computeMesh();
-
+        // populate pop_idx with indices (from 0 to population)
+        pop_idx.push_back(i); 
     }
 
     // create a vector for future parents
-    std::vector<SolarCollector> parents;
+    std::vector<uint32_t> parents;
     parents.reserve(2);
 
     // format text for CSV integration
     std::cout << "Gen";
-    for (uint32_t i = 0; i < popsize; i++)
-        std::cout << ";F" << std::to_string(i);
+    for (const auto& idx : pop_idx) { 
+        std::cout << ";F" << std::to_string(idx);
+    }
     std::cout << std::endl;
 
-   printTime("Setting up the population: "); 
+    printTime("Setting up the population: "); 
 
     while (true)
     {
@@ -103,33 +109,32 @@ int main (int argc, char** argv)
 
         printTime("Computing fitness: "); 
 
-        sort(population.begin(), population.end(), std::greater<>()); // sorted best to worst -- slow, consider using pointers
+        // sorted best to worst using indices
+        sort(pop_idx.begin(), pop_idx.end(), [&](const uint32_t a, const uint32_t b) {
+            return population[a].fitness > population[b].fitness; // Sort in descending order of fitness
+        });
 
+        // print fitness for every SolarCollector
         std::cout << std::to_string(generation);
-        for (auto pop = population.begin(); pop != population.end(); pop++)
-            std::cout << ";" << std::to_string(pop->fitness);
-            // std::cout << *pop << std::endl;
+        for (const auto& idx : pop_idx) { // Use const auto& for efficiency
+            std::cout << ";" << std::to_string(population[idx].fitness);
+        }
         std::cout << std::endl;
-  
+
         printTime("Sorting and printing: "); 
 
-        for (uint32_t i = 0; i < popsize/3 ; i++)    // remove the weak
-        {
-            population.pop_back();
-        }
-        
-        printTime("Erasing: "); 
+        // replace weak indivituals
+        for (uint32_t i = popsize - popsize / 3; i < popsize; ++i) {
+            // Clear parents 
+            parents.clear(); 
+            // Select two random parents from the *top* 2/3 of the population.
+            std::sample(pop_idx.begin(), pop_idx.begin() + (popsize - popsize / 3), std::back_inserter(parents), 2, mt);
 
-        while (population.size() < popsize)
-        {
-            // get two random parents
-            std::sample(population.begin(), population.end(), std::back_inserter(parents), 2, mt);
-            // create an offspring
-            const Genome offspring(parents[0], parents[1], 0.6, 0.05, 0.225);
-            // add it to population
-            population.push_back(SolarCollector(xsize, ysize, hmax, &obs, offspring));
-            // remove parents to make place for new ones
-            parents.clear();
+            // Create an offspring using the selected parents.
+            const Genome offspring(population[parents[0]], population[parents[1]], 0.6, 0.05, 0.225);
+
+            // Replace the weak individual (at pop_idx[i]) with the new offspring.
+            population[pop_idx[i]] = SolarCollector(xsize, ysize, hmax, &obs, offspring);
         }
          
         printTime("Crossover and mutation: "); 
