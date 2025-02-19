@@ -134,9 +134,6 @@ int main (int argc, char** argv)
          
         printTime("Crossover and mutation: "); 
 
-        // dont mutate the elites
-        // std::cout << "crossovered" << std::endl;
-
         ++generation;
         // return 0;
     }

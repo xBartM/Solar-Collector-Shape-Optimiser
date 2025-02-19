@@ -35,27 +35,26 @@ Mesh3d::Mesh3d(const std::string filename, const double xmove, const double ymov
 Mesh3d::~Mesh3d() {}
 
 void Mesh3d::moveXY(const double& x, const double& y) {
-    // Use std::for_each with std::execution::par_unseq for parallel execution.
 
     // Apply the translation to all x and y components of vertices and midpoints.
     auto translate_x = [x](double& val) { val += x; };
     auto translate_y = [y](double& val) { val += y; };
 
     // Vertices v0
-    std::for_each(std::execution::par_unseq, v0x.begin(), v0x.end(), translate_x);
-    std::for_each(std::execution::par_unseq, v0y.begin(), v0y.end(), translate_y);
+    std::for_each(std::execution::unseq, v0x.begin(), v0x.end(), translate_x);
+    std::for_each(std::execution::unseq, v0y.begin(), v0y.end(), translate_y);
 
     // Vertices v1
-    std::for_each(std::execution::par_unseq, v1x.begin(), v1x.end(), translate_x);
-    std::for_each(std::execution::par_unseq, v1y.begin(), v1y.end(), translate_y);
+    std::for_each(std::execution::unseq, v1x.begin(), v1x.end(), translate_x);
+    std::for_each(std::execution::unseq, v1y.begin(), v1y.end(), translate_y);
 
     // Vertices v2
-    std::for_each(std::execution::par_unseq, v2x.begin(), v2x.end(), translate_x);
-    std::for_each(std::execution::par_unseq, v2y.begin(), v2y.end(), translate_y);
+    std::for_each(std::execution::unseq, v2x.begin(), v2x.end(), translate_x);
+    std::for_each(std::execution::unseq, v2y.begin(), v2y.end(), translate_y);
 
     // Midpoints
-    std::for_each(std::execution::par_unseq, midpx.begin(), midpx.end(), translate_x);
-    std::for_each(std::execution::par_unseq, midpy.begin(), midpy.end(), translate_y);
+    std::for_each(std::execution::unseq, midpx.begin(), midpx.end(), translate_x);
+    std::for_each(std::execution::unseq, midpy.begin(), midpy.end(), translate_y);
 
     // Do NOT transform normals.  Normals represent direction and are invariant under translation.
     findEdges();
@@ -147,8 +146,7 @@ vertex tMidPoint(const triangle& t) {
 
 void Mesh3d::findCircumcentres() {
 
-    // Use parallel execution policy for maximum performance.
-    std::for_each(std::execution::par_unseq,
+    std::for_each(std::execution::unseq,
                   std::views::iota(0u, triangle_count).begin(), // Use iota view
                   std::views::iota(0u, triangle_count).end(),
                   [this](uint32_t i) {
@@ -200,8 +198,7 @@ void Mesh3d::findNormals() {
         return; // Nothing to do for an empty mesh.
     }
 
-    // Use std::for_each with std::execution::par_unseq to parallelize the normal calculation.
-    std::for_each(std::execution::par_unseq,
+    std::for_each(std::execution::unseq,
                   std::views::iota(0u, triangle_count).begin(), // Use iota view
                   std::views::iota(0u, triangle_count).end(),
                   [this](uint32_t i) {
@@ -243,7 +240,7 @@ void Mesh3d::findEdges() {
     e2x.resize(triangle_count); e2y.resize(triangle_count); e2z.resize(triangle_count);
 
     // Precompute obstacle edges
-    std::for_each(std::execution::par_unseq,
+    std::for_each(std::execution::unseq,
                 std::views::iota(0u, triangle_count).begin(), // Use iota view
                 std::views::iota(0u, triangle_count).end(),
                 [this](uint32_t i) {
