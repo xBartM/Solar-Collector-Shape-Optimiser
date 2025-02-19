@@ -40,8 +40,9 @@ public:
     std::vector<double> e1x; std::vector<double> e1y; std::vector<double> e1z; // v1 - v0
     std::vector<double> e2x; std::vector<double> e2y; std::vector<double> e2z; // v2 - v0
 
-
     // TODO bounding box; make it recursive up to the depth of 4(?)
+    vertex bbmin;
+    vertex bbmax;
 
     // constructors and a destructor
     Mesh3d();
@@ -58,6 +59,7 @@ public:
     void findCircumcentres();
     void findNormals();
     void findEdges();
+    void findBoundingBox();
     void moveXY(const double& x, const double& y);
     void exportSTL(const std::string& filename) const;
 };

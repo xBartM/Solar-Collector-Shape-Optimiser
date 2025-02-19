@@ -30,6 +30,7 @@ Mesh3d::Mesh3d(const std::string filename, const double xmove, const double ymov
         moveXY(xmove, ymove);
     findCircumcentres();
     findEdges();
+    findBoundingBox();
 }
 
 Mesh3d::~Mesh3d() {}
@@ -253,6 +254,35 @@ void Mesh3d::findEdges() {
         e2y[i] = v2y[i] - v0y[i];
         e2z[i] = v2z[i] - v0z[i];
     });
+
+}
+
+void Mesh3d::findBoundingBox() {
+    if (triangle_count == 0) {
+        return; // Nothing to do for an empty mesh
+    }
+
+    // Initialize bounding box with the first vertex as a starting point
+    bbmin.x = bbmax.x = v0x[0];
+    bbmin.y = bbmax.y = v0y[0];
+    bbmin.z = bbmax.z = v0z[0];
+
+    // Use a lambda for concise min/max updates.  Could also use std::min and std::max.
+    auto updateMinMax = [&](double x, double y, double z) {
+        bbmin.x = std::min(bbmin.x, x);
+        bbmin.y = std::min(bbmin.y, y);
+        bbmin.z = std::min(bbmin.z, z);
+        bbmax.x = std::max(bbmax.x, x);
+        bbmax.y = std::max(bbmax.y, y);
+        bbmax.z = std::max(bbmax.z, z);
+    };
+
+    // Iterate through all vertices.
+    for (uint32_t i = 0; i < triangle_count; ++i) {
+        updateMinMax(v0x[i], v0y[i], v0z[i]);
+        updateMinMax(v1x[i], v1y[i], v1z[i]);
+        updateMinMax(v2x[i], v2y[i], v2z[i]);
+    }
 
 }
 

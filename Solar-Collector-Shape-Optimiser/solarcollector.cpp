@@ -54,10 +54,33 @@ bool SolarCollector::rayObstacleHit(const double& sourcex, const double& sourcey
     const uint32_t obs_tri_count = obstacle->triangle_count;
 
     const vertex usedRay = invertRay ? vertex{-ray.x, -ray.y, -ray.z} : ray;
+    const vertex rayOrigin = {sourcex, sourcey, sourcez}; // Create a vertex for the origin
+
+    // first check against BoundingBox
+    // Slabs method for ray-AABB intersection
+    double tmin = -INFINITY;
+    double tmax = INFINITY;
+
+    for (int i = 0; i < 3; ++i) {
+        double invDir = 1.0 / (&usedRay.x)[i]; // Access x, y, z components using pointer arithmetic
+        double t0 = ((&obstacle->bbmin.x)[i] - (&rayOrigin.x)[i]) * invDir;
+        double t1 = ((&obstacle->bbmax.x)[i] - (&rayOrigin.x)[i]) * invDir;
+
+        if (invDir < 0.0) {
+            std::swap(t0, t1);
+        }
+
+        tmin = std::max(tmin, t0);
+        tmax = std::min(tmax, t1);
+
+        if (tmax <= tmin) {
+            return false; // no intersection with AABB
+        }
+    }
 
     for (uint32_t obs_idx = 0; obs_idx < obs_tri_count; ++obs_idx) {
         
-        // Use a simplified ray-triangle intersection check (see below)
+        // Use a simplified ray-triangle intersection check (Moller-Trumbore)
 
         // Pre-calculated edges are now class members (obs_edge1, obs_edge2)
         const double edge1x = obstacle->e1x[obs_idx];
