@@ -20,12 +20,8 @@ public:
     auto operator<=>(const Genome &other) const { return std::compare_three_way{}(fitness, other.fitness); }
     virtual ~Genome();
 
-    // double getXY(const unsigned short x, const unsigned short y) const;
-    // void setXY(const unsigned short x, const unsigned short y, const double val);
-    // void showYourself(); // Removed: SolarCollector has its own version
-
     // Function to perform crossover and mutation between two Genomes
-    Genome crossoverAndMutate(const Genome &other, double crossover_bias, double mutation_percent, double mutation_range) const;
+    Genome crossoverAndMutate(const Genome &other, const double& crossover_bias, const double& mutation_percent, const double& mutation_range) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Genome& genome);
 

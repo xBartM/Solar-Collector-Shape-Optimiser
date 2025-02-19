@@ -14,7 +14,7 @@ Genome::Genome(const uint32_t dna_size)
 
 Genome::~Genome() {}
 
-Genome Genome::crossoverAndMutate(const Genome &other, double crossover_bias, double mutation_probability, double mutation_range) const {
+Genome Genome::crossoverAndMutate(const Genome &other, const double& crossover_bias, const double& mutation_probability, const double& mutation_range) const {
     Genome offspring(dna_size);
 
     // TODO: random device and distributions could be static (but that takes away the control to dynamically change them with each crossoverAnd.. call (can be passed to function))
@@ -46,14 +46,4 @@ std::ostream& operator<<(std::ostream& os, const Genome& genome) {
     os << "Chromosome Size: " << genome.dna_size << ", Fitness: " << genome.fitness;
     return os;
 }
-
-
-// void Genome::showYourself() {
-//     std::cout << (int)id << " " << xsize << " " << ysize << std::endl;
-//     for (int y = 0; y < ysize; y++) {
-//         for (int x = 0; x < xsize; x++)
-//             std::cout << getXY(x, y) << " ";
-//         std::cout << std::endl;
-//     }
-// }
 
