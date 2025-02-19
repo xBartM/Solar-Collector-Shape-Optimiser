@@ -11,16 +11,27 @@
 
 #define MAIN_TIMED
 
+void printTime(const std::string str)
+{
+    static auto start = std::chrono::high_resolution_clock::now();
+    static auto end = std::chrono::high_resolution_clock::now();
+    static std::chrono::duration<double> deltatime = end - start;
+
+    if (str == "") return;
+
+    #ifdef MAIN_TIMED
+    end = std::chrono::high_resolution_clock::now();
+    deltatime = end - start;
+    std::cout << str << deltatime.count() << " s\n";
+    start = std::chrono::high_resolution_clock::now();
+    #endif // MAIN_TIMED
+
+}
 
 void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint32_t hmax, const Mesh3d* obs);
 
 int main (int argc, char** argv)
 {
-    #ifdef MAIN_TIMED
-    auto start = std::chrono::high_resolution_clock::now();
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> deltatime = end - start;
-    #endif // MAIN_TIMED
 
     uint32_t xsize;   // size of the panel (in mm preferably?)
     uint32_t ysize;   // -||-
@@ -49,22 +60,12 @@ int main (int argc, char** argv)
     // std::uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
     std::uniform_real_distribution<double> hdist(0.0, (double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
 
-    #ifdef MAIN_TIMED
-    end = std::chrono::high_resolution_clock::now();
-    deltatime = end - start;
-    std::cout << "Setting up main() variables: " << deltatime.count() << " s\n";
-    start = std::chrono::high_resolution_clock::now();
-    #endif // MAIN_TIMED
+    printTime(""); // prime all MAIN_TIMED variables
 
     const Mesh3d obs("obstacle.stl", (xsize-1.0)/2.0, (hmax-1.0)/2.0);
     //obs.exportSTL("my_obstacle.stl");
 
-    #ifdef MAIN_TIMED
-    end = std::chrono::high_resolution_clock::now();
-    deltatime = end - start;
-    std::cout << "Setting up the obstacle: " << deltatime.count() << " s\n";
-    start = std::chrono::high_resolution_clock::now();
-    #endif // MAIN_TIMED
+    printTime("Setting up the obstacle: "); 
 
     // findProperHmaxDist(xsize, ysize, hmax, &obs);
 
@@ -89,12 +90,7 @@ int main (int argc, char** argv)
         std::cout << ";F" << std::to_string(i);
     std::cout << std::endl;
 
-    #ifdef MAIN_TIMED
-    end = std::chrono::high_resolution_clock::now();
-    deltatime = end - start;
-    std::cout << "Setting up the population: " << deltatime.count() << " s\n";
-    start = std::chrono::high_resolution_clock::now();
-    #endif // MAIN_TIMED
+   printTime("Setting up the population: "); 
 
     while (true)
     {
@@ -105,12 +101,7 @@ int main (int argc, char** argv)
             }
         });
 
-        #ifdef MAIN_TIMED
-        end = std::chrono::high_resolution_clock::now();
-        deltatime = end - start;
-        std::cout << "Computing fitness: " << deltatime.count() << " s\n";
-        start = std::chrono::high_resolution_clock::now();
-        #endif // MAIN_TIMED
+        printTime("Computing fitness: "); 
 
         sort(population.begin(), population.end(), std::greater<>()); // sorted best to worst -- slow, consider using pointers
 
@@ -120,24 +111,14 @@ int main (int argc, char** argv)
             // std::cout << *pop << std::endl;
         std::cout << std::endl;
   
-        #ifdef MAIN_TIMED
-        end = std::chrono::high_resolution_clock::now();
-        deltatime = end - start;
-        std::cout << "Sorting and printing: " << deltatime.count() << " s\n";
-        start = std::chrono::high_resolution_clock::now();
-        #endif // MAIN_TIMED
+        printTime("Sorting and printing: "); 
 
         for (uint32_t i = 0; i < popsize/3 ; i++)    // remove the weak
         {
             population.pop_back();
         }
         
-        #ifdef MAIN_TIMED
-        end = std::chrono::high_resolution_clock::now();
-        deltatime = end - start;
-        std::cout << "Erasing: " << deltatime.count() << " s\n";
-        start = std::chrono::high_resolution_clock::now();
-        #endif // MAIN_TIMED
+        printTime("Erasing: "); 
 
         while (population.size() < popsize)
         {
@@ -151,12 +132,7 @@ int main (int argc, char** argv)
             parents.clear();
         }
          
-        #ifdef MAIN_TIMED
-        end = std::chrono::high_resolution_clock::now();
-        deltatime = end - start;
-        std::cout << "Crossover and mutation: " << deltatime.count() << " s\n";
-        start = std::chrono::high_resolution_clock::now();
-        #endif // MAIN_TIMED
+        printTime("Crossover and mutation: "); 
 
         // dont mutate the elites
         // std::cout << "crossovered" << std::endl;
