@@ -22,7 +22,7 @@ void printTime(const std::string str)
     #ifdef MAIN_TIMED
     end = std::chrono::high_resolution_clock::now();
     deltatime = end - start;
-    std::cout << str << deltatime.count() << " s\n";
+    std::cerr << str << deltatime.count() << " s\n";
     start = std::chrono::high_resolution_clock::now();
     #endif // MAIN_TIMED
 
@@ -140,7 +140,7 @@ int main (int argc, char** argv)
         printTime("Crossover and mutation: "); 
 
         ++generation;
-        if (generation == 3) return 0;
+        // if (generation == 3) return 0;
     }
 
     return 0;
