@@ -139,8 +139,16 @@ int main (int argc, char** argv)
          
         printTime("Crossover and mutation: "); 
 
+
+        // export the best from the population once every while
+        if (!(generation % 25)) {
+            population[pop_idx[0]].exportAsSTL("Gen" + std::to_string(generation) + ".stl");
+            printTime("Export: "); 
+
+        }
         ++generation;
         // if (generation == 3) return 0;
+
     }
 
     return 0;
