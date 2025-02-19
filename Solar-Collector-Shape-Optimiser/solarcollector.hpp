@@ -18,10 +18,7 @@ public:
     std::vector<triangle> reflecting; // I think it's for checking the shape of the mesh built only from triangles that reflect the ray directly onto the obstacle - it's an overkill to store all triangles, just store bools or something
 
     SolarCollector (const uint32_t xs, const uint32_t ys, const uint32_t hm, const Mesh3d* obs);
-    SolarCollector (const SolarCollector & other);
-    SolarCollector (SolarCollector&& other) noexcept;
-    SolarCollector& operator= (SolarCollector&& other) noexcept;
-    SolarCollector& operator= (const SolarCollector & other);
+    // copy, move constructors, assignments can be default
     ~SolarCollector();
 
     double getXY(const uint32_t x, const uint32_t y) const;

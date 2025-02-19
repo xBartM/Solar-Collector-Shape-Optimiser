@@ -170,7 +170,7 @@ int main (int argc, char** argv)
         // cout << "crossovered" << endl;
 
         ++generation;
-        return 0;
+        // return 0;
     }
 
     return 0;

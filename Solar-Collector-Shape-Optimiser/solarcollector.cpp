@@ -18,57 +18,6 @@ SolarCollector::SolarCollector(const uint32_t xs, const uint32_t ys, const uint3
     , obstacle(obs) 
 {}
 
-SolarCollector::SolarCollector (const SolarCollector & other)
-    : Genome(other)
-    , xsize(other.xsize)
-    , ysize(other.ysize)
-    , hmax(other.hmax)
-    , shape_mesh(other.shape_mesh)
-    , obstacle(other.obstacle)
-    , reflecting(other.reflecting)
-{}
-
-SolarCollector::SolarCollector (SolarCollector&& other) noexcept
-    : Genome(std::move(other))
-    , xsize(std::move(other.xsize))
-    , ysize(std::move(other.ysize))
-    , hmax(std::move(other.hmax))
-    , shape_mesh(std::move(other.shape_mesh))
-    , obstacle(std::move(other.obstacle))
-    , reflecting(std::move(other.reflecting))
-{}
-
-SolarCollector& SolarCollector::operator= (SolarCollector&& other) noexcept {
-    if (this != &other)
-    {
-        Genome::operator=(std::move(other)); // Call the base class assignment operator
-        xsize = std::move(other.xsize);
-        ysize = std::move(other.ysize);
-        hmax = std::move(other.hmax);
-        shape_mesh = std::move(other.shape_mesh);
-        obstacle = std::move(other.obstacle);
-        reflecting = std::move(other.reflecting);
-
-    }
-    return *this;
-}
-
-SolarCollector& SolarCollector::operator= (const SolarCollector & other)
-{
-    Genome::operator=(other); // Call the base class assignment operator
-    xsize = other.xsize;
-    ysize = other.ysize;
-    hmax = other.hmax;
-
-    shape_mesh = other.shape_mesh; // we can use Mesh3d operator=
-
-    obstacle = other.obstacle;
- 
-    reflecting = other.reflecting;
-    
-    return *this;
-}
-
 SolarCollector::~SolarCollector() {}
 
 double SolarCollector::getXY(const uint32_t x, const uint32_t y) const {
@@ -85,7 +34,7 @@ void SolarCollector::setXY(const uint32_t x, const uint32_t y, const double val)
 }
 
 void SolarCollector::showYourself() const {
-    std::cout << id << " " << xsize << " " << ysize << std::endl;
+    std::cout << xsize << " " << ysize << std::endl;
     for (uint32_t y = 0; y < ysize; y++) {
         for (uint32_t x = 0; x < xsize; x++)
             std::cout << getXY(x, y) << " ";

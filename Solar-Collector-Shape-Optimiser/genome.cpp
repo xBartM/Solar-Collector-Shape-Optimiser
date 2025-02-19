@@ -5,54 +5,12 @@
 
 #include <Solar-Collector-Shape-Optimiser/genome.hpp>
 
-uint32_t Genome::next_id = 0;
 
 Genome::Genome(const uint32_t dna_size)
-    : id(next_id++), dna_size(dna_size) { 
-    dna.resize(dna_size);
-    fitness = 0;
-}
-
-Genome::Genome (const Genome & other)
-    : id(other.id), dna_size(other.dna_size), fitness(other.fitness) {
-    dna.resize(other.dna_size);
-    std::copy(other.dna.begin(), other.dna.end(), dna.begin());    
-}
-
-Genome::Genome(Genome&& other) noexcept
-    : id(other.id),
-      dna_size(std::move(other.dna_size)),
-      dna(std::move(other.dna)),
-      fitness(std::move(other.fitness))
-{
-    other.dna_size = 0; // set to some default value to avoid problems later
-}
-
-Genome& Genome::operator= (Genome&& other) noexcept {
-    if (this != &other)
-    {
-        dna.clear(); // or dna.resize(0); to release memory
-        id = other.id;
-        dna_size = std::move(other.dna_size);
-        fitness = std::move(other.fitness);
-        dna = std::move(other.dna);
-
-        other.dna_size = 0; // set to some default value to avoid problems later
-    }
-    return *this;
-}
-
-Genome& Genome::operator= (const Genome & other)
-{
-    id = other.id;
-    dna_size = other.dna_size;
-    fitness = other.fitness;
-
-    dna.resize(other.dna_size);
-    std::copy(other.dna.begin(), other.dna.end(), dna.begin());
-    
-    return *this;
-}
+    : dna_size(dna_size)  
+    , dna(dna_size)
+    , fitness(0.0)
+{}
 
 Genome::~Genome() {}
 
@@ -85,7 +43,7 @@ Genome Genome::crossoverAndMutate(const Genome &other, double crossover_bias, do
 }
 
 std::ostream& operator<<(std::ostream& os, const Genome& genome) {
-    os << "ID: " << genome.id << ", Chromosome Size: " << genome.dna_size << ", Fitness: " << genome.fitness;
+    os << "Chromosome Size: " << genome.dna_size << ", Fitness: " << genome.fitness;
     return os;
 }
 
