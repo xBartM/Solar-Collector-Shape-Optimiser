@@ -92,7 +92,7 @@ int main (int argc, char** argv)
     #ifdef MAIN_TIMED
     end = std::chrono::high_resolution_clock::now();
     deltatime = end - start;
-    std::cout << "Setting up population: " << deltatime.count() << " s\n";
+    std::cout << "Setting up the population: " << deltatime.count() << " s\n";
     start = std::chrono::high_resolution_clock::now();
     #endif // MAIN_TIMED
 
