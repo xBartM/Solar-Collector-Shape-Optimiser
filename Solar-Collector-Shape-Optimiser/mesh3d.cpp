@@ -24,9 +24,16 @@ Mesh3d::Mesh3d(const uint32_t triangle_count)
 {}
 
 // Constructor from file (STL)
-Mesh3d::Mesh3d(const std::string filename) 
-    : Mesh3d(importSTL(filename))
-{
+// Mesh3d::Mesh3d(const std::string filename) 
+//     : Mesh3d(importSTL(filename)) {
+//     findCircumcentres();
+//     findEdges();
+// }
+
+Mesh3d::Mesh3d(const std::string filename, const double xmove, const double ymove)
+    : Mesh3d(importSTL(filename)) {  
+    if (xmove != 0.0 && ymove != 0.0)
+        moveXY(xmove, ymove);
     findCircumcentres();
     findEdges();
 }

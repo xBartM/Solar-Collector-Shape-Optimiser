@@ -42,7 +42,7 @@ int main (int argc, char** argv)
         xsize   = 180+1;    // size of printbed (minus some spare space)
         ysize   = 940+1;    // length of aluminum rod
         hmax    = 180+1;    // height of printbed (minus some spare space)
-        popsize = 40;       // make popsize divisible by 4 xd
+        popsize = 4;       // make popsize divisible by 4 xd
     }
 
     random_device rd;
@@ -57,8 +57,9 @@ int main (int argc, char** argv)
     #endif // MAIN_TIMED
 
     // obs2 should be const
-    Mesh3d obs("obstacle.stl");
-    obs.moveXY((xsize-1.0)/2.0, (hmax-1.0)/2.0);
+    const Mesh3d obs("obstacle.stl", (xsize-1.0)/2.0, (hmax-1.0)/2.0);
+    // Mesh3d obs("obstacle.stl");
+    // obs.moveXY((xsize-1.0)/2.0, (hmax-1.0)/2.0);
     //obs.exportSTL("my_obstacle.stl");
 
     #ifdef MAIN_TIMED
