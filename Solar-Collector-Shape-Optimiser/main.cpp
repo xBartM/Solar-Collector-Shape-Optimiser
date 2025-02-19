@@ -47,7 +47,7 @@ int main (int argc, char** argv)
     std::random_device rd;
     std::mt19937 mt(rd());
     // std::uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
-    std::uniform_real_distribution<double> dist(0.0, (double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
+    std::uniform_real_distribution<double> hdist(0.0, (double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
 
     #ifdef MAIN_TIMED
     end = std::chrono::high_resolution_clock::now();
@@ -68,15 +68,20 @@ int main (int argc, char** argv)
 
     // findProperHmaxDist(xsize, ysize, hmax, &obs);
 
+    // create a population
     std::vector<SolarCollector> population;
     population.reserve(popsize); // reserve space to avoid reallocations
     for (uint32_t i = 0, j = 0; i < popsize; i++, j++) {
         population.emplace_back(xsize, ysize, hmax, &obs);
         for (uint32_t k = 0; k < xsize*ysize; k++)
-            population[i].setXY(k, 0, dist(mt));
+            population[i].setXY(k, 0, hdist(mt));
         population[i].computeMesh();
 
     }
+
+    // create a vector for future parents
+    std::vector<SolarCollector> parents;
+    parents.reserve(2);
 
     // format text for CSV integration
     std::cout << "Gen";
@@ -134,15 +139,16 @@ int main (int argc, char** argv)
         start = std::chrono::high_resolution_clock::now();
         #endif // MAIN_TIMED
 
-        for (auto pop = population.begin(); population.size() < popsize; pop++)
+        while (population.size() < popsize)
         {
-            // this could be offspring constructor xDD
-
-            // auto offspring = pop->crossoverAndMutate(*(pop + 1), 0.6, 0.05, 0.225); // this is wrong - choose parents at random (?)
-            const Genome offspring(*pop, *(pop+1), 0.6, 0.05, 0.225); 
-
+            // get two random parents
+            std::sample(population.begin(), population.end(), std::back_inserter(parents), 2, mt);
+            // create an offspring
+            const Genome offspring(parents[0], parents[1], 0.6, 0.05, 0.225);
+            // add it to population
             population.push_back(SolarCollector(xsize, ysize, hmax, &obs, offspring));
-  
+            // remove parents to make place for new ones
+            parents.clear();
         }
          
         #ifdef MAIN_TIMED
