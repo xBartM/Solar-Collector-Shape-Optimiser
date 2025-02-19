@@ -71,7 +71,6 @@ vertex divide(const vertex& a, double c);
 vertex unitNormal(const vertex& v0, const vertex& v1, const vertex& v2);
 vertex unitNormal(const triangle& t);
 vertex tMidPoint(const triangle& t);
-vertex calculateReflection(const triangle& t, const vertex& ray);
 vertex calculateReflection(const vertex& normal, const vertex& ray);
 
 Mesh3d importSTL(const std::string& filename);

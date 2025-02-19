@@ -256,11 +256,6 @@ void Mesh3d::findEdges() {
 
 }
 
-vertex calculateReflection(const triangle& t, const vertex& ray) {
-    return calculateReflection(unitNormal(t), ray);
-
-}
-
 vertex calculateReflection(const vertex& normal, const vertex& ray) {
     // reflection = ray - 2 * dotProduct(ray, normal) * normal
     const double dot = dotProduct(ray, normal);

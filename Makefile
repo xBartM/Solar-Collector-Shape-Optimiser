@@ -5,12 +5,13 @@ CXX = g++
 CXXFLAGS = -std=c++23 -Wall -Wextra -pedantic -I.
 LDFLAGS = -ltbb
 # Use '-g' to generate debug information, or '-O3' for optimization
-# CXXFLAGS += -pg -g
-# CXXFLAGS += -pthread
+CXXFLAGS += -pg -g
 # CXXFLAGS += -fopenmp
-# CXXFLAGS += -ftree-parallelize-loops=4
-CXXFLAGS += -O2
-# CXXFLAGS += -O3
+# CXXFLAGS += -O2
+CXXFLAGS += -O3
+CXXFLAGS += -march=native
+# CXXFLAGS += -ffast-math
+
 # Output executable name
 TARGET = solar_optimiser
 

@@ -50,7 +50,7 @@ int main (int argc, char** argv)
         popsize = std::stoul(argv[4]);
     } else {
         xsize   = 180+1;    // size of printbed (minus some spare space)
-        ysize   = 940+1;    // length of aluminum rod
+        ysize   = 94+1;    // length of aluminum rod
         hmax    = 180+1;    // height of printbed (minus some spare space)
         popsize = 40;       // make popsize divisible by 4 xd
     }
@@ -135,7 +135,7 @@ int main (int argc, char** argv)
         printTime("Crossover and mutation: "); 
 
         ++generation;
-        // return 0;
+        if (generation == 3) return 0;
     }
 
     return 0;

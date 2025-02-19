@@ -74,7 +74,7 @@ bool SolarCollector::rayObstacleHit(const double& sourcex, const double& sourcey
 
         const double a = edge1x * hx + edge1y * hy + edge1z * hz;
 
-        if (a > -EPSILON && a < EPSILON)
+        if (std::abs(a) < EPSILON)
             continue;    // This ray is parallel to this triangle.
 
         const double f = 1.0 / a;
@@ -107,7 +107,7 @@ void SolarCollector::computeFitness(const std::vector<vertex>& rays) {
 
     const uint32_t mesh_tri_count = shape_mesh.triangle_count;
 
-    fitness = 0; // Reset fitness
+    fitness = 0.0; // Reset fitness
 
 
     // --- Step 1: Iterate through rays ---
@@ -118,19 +118,23 @@ void SolarCollector::computeFitness(const std::vector<vertex>& rays) {
             // 2.1 Calculate reflected ray for the *current mesh triangle*.
             const vertex mesh_normal(shape_mesh.normx[mesh_idx], shape_mesh.normy[mesh_idx], shape_mesh.normz[mesh_idx]); // Get precomputed normal
 
-            const vertex reflection = calculateReflection(mesh_normal, ray); // Simpler reflection calculation (see below)
+            const vertex reflection = calculateReflection(mesh_normal, ray); // Simpler reflection calculation
 
 
             // --- Step 4: Check against *all obstacle triangles* ---
+            const double midx = shape_mesh.midpx[mesh_idx];            
+            const double midy = shape_mesh.midpy[mesh_idx];
+            const double midz = shape_mesh.midpz[mesh_idx];
+
             // if ray hits (is blocked by) the obstacle continue to the next mesh triangle
-            if (rayObstacleHit(shape_mesh.midpx[mesh_idx], shape_mesh.midpy[mesh_idx], shape_mesh.midpz[mesh_idx], ray, true)) {
+            if (rayObstacleHit(midx, midy, midz, ray, true)) {
                 continue;
             }
 
             // Check against all obstacle triangles (for reflected rays)
             // if reflected ray hits the obstacle increment fitness
-            if (rayObstacleHit(shape_mesh.midpx[mesh_idx], shape_mesh.midpy[mesh_idx], shape_mesh.midpz[mesh_idx], reflection, false)) {
-                fitness += 1;
+            if (rayObstacleHit(midx, midy, midz, reflection, false)) {
+                fitness += 1.0;
             }
 
         }
