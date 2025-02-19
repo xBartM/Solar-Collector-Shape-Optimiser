@@ -11,16 +11,15 @@
 
 #define MAIN_TIMED
 
-using namespace std;
 
 void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint32_t hmax, const Mesh3d* obs);
 
 int main (int argc, char** argv)
 {
     #ifdef MAIN_TIMED
-    auto start = chrono::high_resolution_clock::now();
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> deltatime = end - start;
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> deltatime = end - start;
     #endif // MAIN_TIMED
 
     uint32_t xsize;   // size of the panel (in mm preferably?)
@@ -29,15 +28,15 @@ int main (int argc, char** argv)
     uint32_t popsize; // size of the population
 
     uint32_t generation = 0;  // number of current generation
-    vertex ray(0, -1, 0);
-    std::vector<vertex> rays({ray});
+    const vertex ray(0, -1, 0);
+    const std::vector<vertex> rays({ray});
 
     // +1 because, ex.: xsize, ysize = 2, 2 gives 2 triangles/1 square with a side of length 1mm
     if (argc == 5) {
-        xsize   = stoul(argv[1])+1;
-        ysize   = stoul(argv[2])+1;
-        hmax    = stoul(argv[3])+1;
-        popsize = stoul(argv[4]);
+        xsize   = std::stoul(argv[1])+1;
+        ysize   = std::stoul(argv[2])+1;
+        hmax    = std::stoul(argv[3])+1;
+        popsize = std::stoul(argv[4]);
     } else {
         xsize   = 180+1;    // size of printbed (minus some spare space)
         ysize   = 940+1;    // length of aluminum rod
@@ -45,34 +44,30 @@ int main (int argc, char** argv)
         popsize = 4;       // make popsize divisible by 4 xd
     }
 
-    random_device rd;
-    mt19937 mt(rd());
-    uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
 
     #ifdef MAIN_TIMED
-    end = chrono::high_resolution_clock::now();
+    end = std::chrono::high_resolution_clock::now();
     deltatime = end - start;
     std::cout << "Setting up main() variables: " << deltatime.count() << " s\n";
-    start = chrono::high_resolution_clock::now();
+    start = std::chrono::high_resolution_clock::now();
     #endif // MAIN_TIMED
 
-    // obs2 should be const
     const Mesh3d obs("obstacle.stl", (xsize-1.0)/2.0, (hmax-1.0)/2.0);
-    // Mesh3d obs("obstacle.stl");
-    // obs.moveXY((xsize-1.0)/2.0, (hmax-1.0)/2.0);
     //obs.exportSTL("my_obstacle.stl");
 
     #ifdef MAIN_TIMED
-    end = chrono::high_resolution_clock::now();
+    end = std::chrono::high_resolution_clock::now();
     deltatime = end - start;
     std::cout << "Setting up the obstacle: " << deltatime.count() << " s\n";
-    start = chrono::high_resolution_clock::now();
+    start = std::chrono::high_resolution_clock::now();
     #endif // MAIN_TIMED
 
     // findProperHmaxDist(xsize, ysize, hmax, &obs);
 
-    // vector<Genome> gene_pool;
-    vector<SolarCollector> population;
+    std::vector<SolarCollector> population;
     population.reserve(popsize); // reserve space to avoid reallocations
     for (uint32_t i = 0, j = 0; i < popsize; i++, j++) {
         population.emplace_back(xsize, ysize, hmax, &obs);
@@ -83,16 +78,16 @@ int main (int argc, char** argv)
     }
 
     // format text for CSV integration
-    cout << "Gen";
+    std::cout << "Gen";
     for (uint32_t i = 0; i < popsize; i++)
-        cout << ";F" << to_string(i);
-    cout << endl;
+        std::cout << ";F" << std::to_string(i);
+    std::cout << std::endl;
 
     #ifdef MAIN_TIMED
-    end = chrono::high_resolution_clock::now();
+    end = std::chrono::high_resolution_clock::now();
     deltatime = end - start;
     std::cout << "Setting up population: " << deltatime.count() << " s\n";
-    start = chrono::high_resolution_clock::now();
+    start = std::chrono::high_resolution_clock::now();
     #endif // MAIN_TIMED
 
     while (true)
@@ -105,25 +100,25 @@ int main (int argc, char** argv)
         });
 
         #ifdef MAIN_TIMED
-        end = chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         deltatime = end - start;
         std::cout << "Computing fitness: " << deltatime.count() << " s\n";
-        start = chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         #endif // MAIN_TIMED
 
         sort(population.begin(), population.end(), std::greater<>()); // sorted best to worst
 
-        cout << to_string(generation);
+        std::cout << std::to_string(generation);
         for (auto pop = population.begin(); pop != population.end(); pop++)
-            cout << ";" << to_string(pop->fitness);
-            // cout << *pop << endl;
-        cout << endl;
+            std::cout << ";" << std::to_string(pop->fitness);
+            // std::cout << *pop << std::endl;
+        std::cout << std::endl;
   
         #ifdef MAIN_TIMED
-        end = chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         deltatime = end - start;
         std::cout << "Sorting and printing: " << deltatime.count() << " s\n";
-        start = chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         #endif // MAIN_TIMED
 
         for (uint32_t i = 0; i < popsize/3 ; i++)    // remove the weak
@@ -133,13 +128,13 @@ int main (int argc, char** argv)
         }
         
         #ifdef MAIN_TIMED
-        end = chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         deltatime = end - start;
         std::cout << "Erasing: " << deltatime.count() << " s\n";
-        start = chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         #endif // MAIN_TIMED
 
-        // start = chrono::high_resolution_clock::now();
+        // start = std::chrono::high_resolution_clock::now();
         for (auto pop = population.begin(); population.size() < popsize; pop++)
         {
             // this could be offspring constructor xDD
@@ -160,14 +155,14 @@ int main (int argc, char** argv)
         }
          
         #ifdef MAIN_TIMED
-        end = chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         deltatime = end - start;
         std::cout << "Crossover and mutation: " << deltatime.count() << " s\n";
-        start = chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         #endif // MAIN_TIMED
 
         // dont mutate the elites
-        // cout << "crossovered" << endl;
+        // std::cout << "crossovered" << std::endl;
 
         ++generation;
         // return 0;
@@ -183,19 +178,19 @@ void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint3
     vertex ray(0, -1, 0);
     std::vector<vertex> rays({ray});
 
-    random_device rd;
-    mt19937 mt(rd());
-    uniform_real_distribution<double> dist(0.0, 1.0);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<double> dist(0.0, 1.0);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
 
-    vector<SolarCollector> seed;//(0, xsize, ysize, hmax, &obs);
+    std::vector<SolarCollector> seed;//(0, xsize, ysize, hmax, &obs);
     seed.reserve(test_sample); // reserve space to avoid reallocations
-    cout << "hub"; // hmax upper bound
+    std::cout << "hub"; // hmax upper bound
     for (uint32_t i = 0; i < test_sample; ++i)
     {
         seed.emplace_back(xsize, ysize, hmax, obs);
-        cout << ";S" << to_string(i);
+        std::cout << ";S" << std::to_string(i);
     }
-    cout << endl;
+    std::cout << std::endl;
 
     for (double i = 0.0; i <= (double)hmax; i+=(double)hmax/(double)test_batches)//i+=0.0025)
     {
@@ -207,10 +202,10 @@ void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint3
             pop->computeFitness(rays);
         }
 
-        cout << to_string(i);
+        std::cout << std::to_string(i);
         for (auto pop = seed.begin(); pop != seed.end(); pop++)
-            cout << ";" << to_string(pop->fitness);
-        cout << endl;
+            std::cout << ";" << std::to_string(pop->fitness);
+        std::cout << std::endl;
 
     }
     exit(0);
