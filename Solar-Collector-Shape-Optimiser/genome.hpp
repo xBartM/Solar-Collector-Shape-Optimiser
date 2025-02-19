@@ -16,12 +16,10 @@ public:
 
 
     Genome(const uint32_t dna_size);
+    Genome(const Genome &parent1, const Genome &parent2, const double& crossover_bias = 0.5, const double& mutation_probability = 0.0, const double& mutation_range = 0.0);
     // copy, move constructors, assignments can be default
     auto operator<=>(const Genome &other) const { return std::compare_three_way{}(fitness, other.fitness); }
     virtual ~Genome();
-
-    // Function to perform crossover and mutation between two Genomes
-    Genome crossoverAndMutate(const Genome &other, const double& crossover_bias, const double& mutation_percent, const double& mutation_range) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Genome& genome);
 

@@ -41,12 +41,13 @@ int main (int argc, char** argv)
         xsize   = 180+1;    // size of printbed (minus some spare space)
         ysize   = 940+1;    // length of aluminum rod
         hmax    = 180+1;    // height of printbed (minus some spare space)
-        popsize = 4;       // make popsize divisible by 4 xd
+        popsize = 40;       // make popsize divisible by 4 xd
     }
 
     std::random_device rd;
     std::mt19937 mt(rd());
-    std::uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
+    // std::uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
+    std::uniform_real_distribution<double> dist(0.0, (double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
 
     #ifdef MAIN_TIMED
     end = std::chrono::high_resolution_clock::now();
@@ -106,7 +107,7 @@ int main (int argc, char** argv)
         start = std::chrono::high_resolution_clock::now();
         #endif // MAIN_TIMED
 
-        sort(population.begin(), population.end(), std::greater<>()); // sorted best to worst
+        sort(population.begin(), population.end(), std::greater<>()); // sorted best to worst -- slow, consider using pointers
 
         std::cout << std::to_string(generation);
         for (auto pop = population.begin(); pop != population.end(); pop++)
@@ -123,7 +124,6 @@ int main (int argc, char** argv)
 
         for (uint32_t i = 0; i < popsize/3 ; i++)    // remove the weak
         {
-            // delete population.back();
             population.pop_back();
         }
         
@@ -134,23 +134,14 @@ int main (int argc, char** argv)
         start = std::chrono::high_resolution_clock::now();
         #endif // MAIN_TIMED
 
-        // start = std::chrono::high_resolution_clock::now();
         for (auto pop = population.begin(); population.size() < popsize; pop++)
         {
             // this could be offspring constructor xDD
-            // population.push_back(crossoverAndMutate(*pop, *(pop+1), 60, 5));
 
-            // Use the crossoverAndMutate method from the Genome class
-            // auto offspring = pop->crossoverAndMutate(*(pop + 1), 60.0, 5.0, 0.225);
-            auto offspring = pop->crossoverAndMutate(*(pop + 1), 0.6, 0.05, 0.225); // this is wrong - choose parents at random (?)
+            // auto offspring = pop->crossoverAndMutate(*(pop + 1), 0.6, 0.05, 0.225); // this is wrong - choose parents at random (?)
+            const Genome offspring(*pop, *(pop+1), 0.6, 0.05, 0.225); 
 
-            // Convert Genome to SolarCollector (assuming constructor compatibility)
-            SolarCollector child(xsize, ysize, hmax, &obs);
-            child.dna = offspring.dna;
-
-            child.computeMesh();
-
-            population.push_back(std::move(child));
+            population.push_back(SolarCollector(xsize, ysize, hmax, &obs, offspring));
   
         }
          
