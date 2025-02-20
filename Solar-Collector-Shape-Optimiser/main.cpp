@@ -5,7 +5,12 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
-#include <execution>
+
+#ifndef NO_STD_EXECUTION
+    #include <execution>
+#else 
+    #include <omp.h>
+#endif // NO_STD_EXECUTION
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 
@@ -101,11 +106,20 @@ int main (int argc, char** argv)
     while (true)
     {
 
-        std::for_each(std::execution::par_unseq, population.begin(), population.end(), [&](auto& pop) {
-            if (pop.fitness == 0) {
-                pop.computeFitness(rays);
+        #ifndef NO_STD_EXECUTION
+            std::for_each(std::execution::par_unseq, population.begin(), population.end(), [&](auto& pop) {
+                if (pop.fitness == 0) {
+                    pop.computeFitness(rays);
+                }
+            });
+        #else 
+            #pragma omp parallel for
+            for (size_t i = 0; i < population.size(); ++i) {
+                if (population[i].fitness == 0) {
+                    population[i].computeFitness(rays);
+                }
             }
-        });
+        #endif // NO_STD_EXECUTION
 
         printTime("Computing fitness: "); 
 
@@ -124,11 +138,11 @@ int main (int argc, char** argv)
         printTime("Sorting and printing: "); 
 
         // replace weak indivituals
-        for (uint32_t i = popsize - popsize / 3; i < popsize; ++i) {
+        for (uint32_t i = popsize - popsize / 2; i < popsize; ++i) {
             // Clear parents 
             parents.clear(); 
             // Select two random parents from the *top* 2/3 of the population.
-            std::sample(pop_idx.begin(), pop_idx.begin() + (popsize - popsize / 3), std::back_inserter(parents), 2, mt);
+            std::sample(pop_idx.begin(), pop_idx.begin() + (popsize - popsize / 2), std::back_inserter(parents), 2, mt);
 
             // Create an offspring using the selected parents.
             const Genome offspring(population[parents[0]], population[parents[1]], 0.6, 0.05, 0.225);

@@ -29,7 +29,13 @@ Genome::Genome(const Genome &parent1, const Genome &parent2, const double& cross
     std::uniform_real_distribution<double> mutation_amount_dist(-mutation_range, mutation_range);
 
     // Use std::transform with std::execution::par_unseq (parallel execution)
-    std::transform(std::execution::unseq, parent1.dna.begin(), parent1.dna.end(), parent2.dna.begin(), dna.begin(),
+    std::transform(
+    #ifndef NO_STD_EXECUTION
+        std::execution::unseq, 
+    #endif // NO_STD_EXECUTIOn
+        parent1.dna.begin(), parent1.dna.end(), 
+        parent2.dna.begin(), 
+        dna.begin(),
         [&](double dna1_val, double dna2_val) {
             const bool crossover_choice = crossover_choice_dist(mt);
             const bool mutation_flag = mutation_choice_dist(mt);

@@ -41,22 +41,42 @@ void Mesh3d::moveXY(const double& x, const double& y) {
     auto translate_x = [x](double& val) { val += x; };
     auto translate_y = [y](double& val) { val += y; };
 
-    // Vertices v0
-    std::for_each(std::execution::unseq, v0x.begin(), v0x.end(), translate_x);
-    std::for_each(std::execution::unseq, v0y.begin(), v0y.end(), translate_y);
+    #ifndef NO_STD_EXECUTION
 
-    // Vertices v1
-    std::for_each(std::execution::unseq, v1x.begin(), v1x.end(), translate_x);
-    std::for_each(std::execution::unseq, v1y.begin(), v1y.end(), translate_y);
+        // Vertices v0
+        std::for_each(std::execution::unseq, v0x.begin(), v0x.end(), translate_x);
+        std::for_each(std::execution::unseq, v0y.begin(), v0y.end(), translate_y);
 
-    // Vertices v2
-    std::for_each(std::execution::unseq, v2x.begin(), v2x.end(), translate_x);
-    std::for_each(std::execution::unseq, v2y.begin(), v2y.end(), translate_y);
+        // Vertices v1
+        std::for_each(std::execution::unseq, v1x.begin(), v1x.end(), translate_x);
+        std::for_each(std::execution::unseq, v1y.begin(), v1y.end(), translate_y);
 
-    // Midpoints
-    std::for_each(std::execution::unseq, midpx.begin(), midpx.end(), translate_x);
-    std::for_each(std::execution::unseq, midpy.begin(), midpy.end(), translate_y);
+        // Vertices v2
+        std::for_each(std::execution::unseq, v2x.begin(), v2x.end(), translate_x);
+        std::for_each(std::execution::unseq, v2y.begin(), v2y.end(), translate_y);
 
+        // Midpoints
+        std::for_each(std::execution::unseq, midpx.begin(), midpx.end(), translate_x);
+        std::for_each(std::execution::unseq, midpy.begin(), midpy.end(), translate_y);
+    #else 
+
+        // Vertices v0
+        std::for_each(v0x.begin(), v0x.end(), translate_x);
+        std::for_each(v0y.begin(), v0y.end(), translate_y);
+
+        // Vertices v1
+        std::for_each(v1x.begin(), v1x.end(), translate_x);
+        std::for_each(v1y.begin(), v1y.end(), translate_y);
+
+        // Vertices v2
+        std::for_each(v2x.begin(), v2x.end(), translate_x);
+        std::for_each(v2y.begin(), v2y.end(), translate_y);
+
+        // Midpoints
+        std::for_each(midpx.begin(), midpx.end(), translate_x);
+        std::for_each(midpy.begin(), midpy.end(), translate_y);
+    #endif // NO_STD_EXECUTION
+    
     // Do NOT transform normals.  Normals represent direction and are invariant under translation.
     findEdges();
 }
@@ -147,7 +167,10 @@ vertex tMidPoint(const triangle& t) {
 
 void Mesh3d::findCircumcentres() {
 
-    std::for_each(std::execution::unseq,
+    std::for_each(
+    #ifndef NO_STD_EXECUTION
+                  std::execution::unseq,
+    #endif // NO_STD_EXECUTION
                   std::views::iota(0u, triangle_count).begin(), // Use iota view
                   std::views::iota(0u, triangle_count).end(),
                   [this](uint32_t i) {
@@ -199,7 +222,10 @@ void Mesh3d::findNormals() {
         return; // Nothing to do for an empty mesh.
     }
 
-    std::for_each(std::execution::unseq,
+    std::for_each(
+    #ifndef NO_STD_EXECUTION
+                  std::execution::unseq,
+    #endif // NO_STD_EXECUTION
                   std::views::iota(0u, triangle_count).begin(), // Use iota view
                   std::views::iota(0u, triangle_count).end(),
                   [this](uint32_t i) {
@@ -241,7 +267,10 @@ void Mesh3d::findEdges() {
     e2x.resize(triangle_count); e2y.resize(triangle_count); e2z.resize(triangle_count);
 
     // Precompute obstacle edges
-    std::for_each(std::execution::unseq,
+    std::for_each(
+    #ifndef NO_STD_EXECUTION
+                std::execution::unseq,
+    #endif // NO_STD_EXECUTION
                 std::views::iota(0u, triangle_count).begin(), // Use iota view
                 std::views::iota(0u, triangle_count).end(),
                 [this](uint32_t i) {
