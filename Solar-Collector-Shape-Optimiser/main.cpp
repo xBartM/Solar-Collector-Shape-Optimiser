@@ -69,7 +69,8 @@ int main (int argc, char** argv)
     printTime(""); // prime all MAIN_TIMED variables
 
     const Mesh3d obs("obstacle.stl", (xsize-1.0)/2.0, (hmax-1.0)/2.0);
-    //obs.exportSTL("my_obstacle.stl");
+    obs.exportBinarySTL("my_obstacle.stl");
+    return 0;
 
     printTime("Setting up the obstacle: "); 
 

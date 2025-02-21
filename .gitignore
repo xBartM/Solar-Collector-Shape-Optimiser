@@ -1,7 +1,7 @@
 *.o
 solar_optimiser
 /wsl
-obstacle.stl
+*.stl
 gmon.out
 profile_report*
 

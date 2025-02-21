@@ -62,6 +62,7 @@ public:
     void findBoundingBox();
     void moveXY(const double& x, const double& y);
     void exportSTL(const std::string& filename) const;
+    void exportBinarySTL(const std::string& filename) const;
 };
 
 vertex xProduct(const vertex& a, const vertex& b);

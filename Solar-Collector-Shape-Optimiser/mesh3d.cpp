@@ -2,6 +2,8 @@
 #include <cmath>
 #include <fstream>
 #include <sstream>
+#include <iostream>
+#include <cstring>
 #include <execution>
 #include <ranges>
 
@@ -100,6 +102,54 @@ void Mesh3d::exportSTL(const std::string& filename) const {
     stlmem << "endsolid Mesh3d" << std::endl;
 
     stlout << stlmem.str(); // Write the entire string at once
+}
+
+void Mesh3d::exportBinarySTL(const std::string& filename) const {
+    // Use a vector<char> as our in-memory buffer
+    std::vector<char> buffer;
+
+    // 1. Reserve space for the header (80 bytes)
+    buffer.resize(80);
+    std::strcpy(buffer.data(), "Binary STL Mesh3d"); // Add an identifier
+
+    // 2. Calculate and reserve space for the number of triangles (4 bytes)
+    const uint32_t numTriangles = triangle_count;
+    const size_t numTrianglesOffset = buffer.size(); // Store the offset where numTriangles will be
+    buffer.resize(buffer.size() + sizeof(numTriangles));
+    std::memcpy(buffer.data() + numTrianglesOffset, &numTriangles, sizeof(numTriangles));
+
+    // 3. Reserve space for all triangle data (50 bytes per triangle)
+    const size_t triangleDataOffset = buffer.size();
+    buffer.resize(buffer.size() + (triangle_count * 50));
+    char* triangleDataPtr = buffer.data() + triangleDataOffset;
+
+    // 4. Write the triangle data to the buffer
+    for (uint32_t i = 0; i < triangle_count; ++i) {
+        const float normal[3] = {(float)normx[i], (float)normy[i], (float)normz[i]};
+        const float v0[3] = {(float)v0x[i], (float)v0y[i], (float)v0z[i]};
+        const float v1[3] = {(float)v1x[i], (float)v1y[i], (float)v1z[i]};
+        const float v2[3] = {(float)v2x[i], (float)v2y[i], (float)v2z[i]};
+        const uint16_t attributeByteCount = 0; // Usually 0
+
+        std::memcpy(triangleDataPtr, normal, sizeof(normal));
+        triangleDataPtr += sizeof(normal);
+        std::memcpy(triangleDataPtr, v0, sizeof(v0));
+        triangleDataPtr += sizeof(v0);
+        std::memcpy(triangleDataPtr, v1, sizeof(v1));
+        triangleDataPtr += sizeof(v1);
+        std::memcpy(triangleDataPtr, v2, sizeof(v2));
+        triangleDataPtr += sizeof(v2);
+        std::memcpy(triangleDataPtr, &attributeByteCount, sizeof(attributeByteCount));
+        triangleDataPtr += sizeof(attributeByteCount);
+    }
+
+    // 5. Write the entire buffer to the file
+    std::ofstream stlout(filename, std::ios::binary | std::ios::trunc);
+    if (!stlout.is_open()) {
+        std::cerr << "Error opening file for writing: " << filename << std::endl;
+        return; // Or throw an exception
+    }
+    stlout.write(buffer.data(), buffer.size());
 }
 
 vertex xProduct(const vertex& a, const vertex& b) {

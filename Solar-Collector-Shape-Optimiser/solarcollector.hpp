@@ -32,6 +32,7 @@ public:
     void computeFitness(const std::vector<vertex>& rays);
     void computeMesh();
     void exportAsSTL(std::string name) const;
+    void exportAsBinarySTL(std::string name) const;
     // void exportReflectionAsSTL();
 };
 

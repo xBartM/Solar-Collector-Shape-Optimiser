@@ -187,6 +187,10 @@ void SolarCollector::exportAsSTL(std::string name) const {
     shape_mesh.exportSTL(name);
 }
 
+void SolarCollector::exportAsBinarySTL(std::string name) const {
+    shape_mesh.exportBinarySTL(name);
+}
+
 // void SolarCollector::exportReflectionAsSTL() {
 //     Mesh3d reflecting_mesh(static_cast<uint32_t>(reflecting.size()));
 //     for (size_t i = 0; i < reflecting.size(); ++i) {
