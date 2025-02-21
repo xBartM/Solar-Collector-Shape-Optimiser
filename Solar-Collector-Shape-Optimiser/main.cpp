@@ -154,7 +154,7 @@ int main (int argc, char** argv)
         printTime("Crossover and mutation: "); 
 
 
-        // export the best from the population once every while
+        // export the best from the population once in a while
         if (!(generation % 25)) {
             population[pop_idx[0]].exportAsBinarySTL("Gen" + std::to_string(generation) + ".stl");
             printTime("Export: "); 
