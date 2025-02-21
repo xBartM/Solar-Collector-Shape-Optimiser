@@ -26,6 +26,8 @@ public:
     auto operator<=>(const Genome &other) const { return std::compare_three_way{}(fitness, other.fitness); }
     virtual ~Genome();
 
+    double calcSimilarity(const Genome &other) const;
+
     friend std::ostream& operator<<(std::ostream& os, const Genome& genome);
 
 };

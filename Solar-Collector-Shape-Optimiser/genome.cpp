@@ -52,6 +52,30 @@ Genome::Genome(const Genome &parent1, const Genome &parent2, const double& cross
 
 Genome::~Genome() {}
 
+// 0.0 should mean that they are the same
+// 1.0 should mean that they are 100% opposite (same, but "negative")
+// 0.5 should mean that they are distinct (think - bit error rate: 0.5 carries no information as opposed to 0.0 or 1.0)
+double Genome::calcSimilarity(const Genome &other) const {
+
+    const double elem_count = dna_size;
+    const double magnitude = dna_max - dna_min;
+
+    // Use std::inner_product (sum of absolute values of differences on each field of DNA)
+    const double acc = 
+        std::inner_product(
+            dna.begin(), dna.end(), 
+            other.dna.begin(), 
+            (double)0.0,
+            std::plus<>(), 
+            [&](double dna1_val, double dna2_val) {
+                return std::abs(dna1_val - dna2_val);
+            }
+        );
+    
+    return acc / (elem_count * magnitude) ;
+}
+
+
 std::ostream& operator<<(std::ostream& os, const Genome& genome) {
     os << "Chromosome Size: " << genome.dna_size << ", Fitness: " << genome.fitness;
     return os;
