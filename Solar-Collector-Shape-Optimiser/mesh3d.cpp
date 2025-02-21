@@ -27,7 +27,7 @@ Mesh3d::Mesh3d(const uint32_t triangle_count)
 
 // Constructor from file (STL)
 Mesh3d::Mesh3d(const std::string filename, const double xmove, const double ymove)
-    : Mesh3d(importSTL(filename)) {  
+    : Mesh3d(importBinarySTL(filename)) {  
     if (xmove != 0.0 && ymove != 0.0)
         moveXY(xmove, ymove);
     findCircumcentres();
@@ -450,6 +450,83 @@ Mesh3d importSTL(const std::string& filename) {
 
         std::getline(file, line);   // get the "facet normal" line ready (or "endsolid" line)
         
+    }
+
+    return ret;
+}
+
+Mesh3d importBinarySTL(const std::string& filename) {
+    std::ifstream stlin(filename, std::ios::binary);
+    if (!stlin.is_open()) {
+        std::cerr << "Error opening file for reading: " << filename << std::endl;
+        return Mesh3d(); // Or throw an exception
+    }
+
+    // 1. Read the entire file into a buffer
+    stlin.seekg(0, std::ios::end);
+    const size_t fileSize = stlin.tellg();
+    stlin.seekg(0, std::ios::beg);
+
+    std::vector<char> buffer(fileSize);
+    stlin.read(buffer.data(), fileSize);
+
+    // 2. Validate the file size (at least 84 bytes, and 84 + 50*N)
+    if (fileSize < 84) {
+        std::cerr << "Error: Invalid STL file size (too small)." << std::endl;
+        return Mesh3d();
+    }
+    
+    // 3. Skip the header (80 bytes)
+    const char* dataPtr = buffer.data() + 80;
+
+    // 4. Read the number of triangles (uint32_t)
+    uint32_t numTriangles;
+    std::memcpy(&numTriangles, dataPtr, sizeof(numTriangles));
+
+    dataPtr += sizeof(numTriangles);
+
+    // 5. Validate file size against the number of triangles
+    if (fileSize != 84 + (numTriangles * 50)) {
+        std::cerr << "Error: Invalid STL file size (mismatch with triangle count)." << std::endl;
+        return Mesh3d();
+    }
+
+    // 6. Resize member vectors
+    Mesh3d ret(numTriangles);
+
+    // 7. Read triangle data
+    for (uint32_t i = 0; i < numTriangles; ++i) {
+        float normal[3];
+        float v0[3];
+        float v1[3];
+        float v2[3];
+        uint16_t attributeByteCount;
+
+        std::memcpy(normal, dataPtr, sizeof(normal));
+        dataPtr += sizeof(normal);
+        std::memcpy(v0, dataPtr, sizeof(v0));
+        dataPtr += sizeof(v0);
+        std::memcpy(v1, dataPtr, sizeof(v1));
+        dataPtr += sizeof(v1);
+        std::memcpy(v2, dataPtr, sizeof(v2));
+        dataPtr += sizeof(v2);
+        std::memcpy(&attributeByteCount, dataPtr, sizeof(attributeByteCount));
+        dataPtr += sizeof(attributeByteCount);
+
+        // Assign to member variables
+        ret.normx[i] = normal[0];
+        ret.normy[i] = normal[1];
+        ret.normz[i] = normal[2];
+        ret.v0x[i] = v0[0];
+        ret.v0y[i] = v0[1];
+        ret.v0z[i] = v0[2];
+        ret.v1x[i] = v1[0];
+        ret.v1y[i] = v1[1];
+        ret.v1z[i] = v1[2];
+        ret.v2x[i] = v2[0];
+        ret.v2y[i] = v2[1];
+        ret.v2z[i] = v2[2];
+        // You might want to do something with attributeByteCount, but it's often ignored.
     }
 
     return ret;

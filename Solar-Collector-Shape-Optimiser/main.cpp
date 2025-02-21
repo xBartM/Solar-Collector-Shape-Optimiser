@@ -68,9 +68,8 @@ int main (int argc, char** argv)
 
     printTime(""); // prime all MAIN_TIMED variables
 
-    const Mesh3d obs("obstacle.stl", (xsize-1.0)/2.0, (hmax-1.0)/2.0);
-    obs.exportBinarySTL("my_obstacle.stl");
-    return 0;
+    const Mesh3d obs("obstacleBin.stl", (xsize-1.0)/2.0, (hmax-1.0)/2.0);
+    // obs.exportBinarySTL("obstacleBin2.stl");
 
     printTime("Setting up the obstacle: "); 
 
@@ -157,7 +156,7 @@ int main (int argc, char** argv)
 
         // export the best from the population once every while
         if (!(generation % 25)) {
-            population[pop_idx[0]].exportAsSTL("Gen" + std::to_string(generation) + ".stl");
+            population[pop_idx[0]].exportAsBinarySTL("Gen" + std::to_string(generation) + ".stl");
             printTime("Export: "); 
 
         }

@@ -77,6 +77,7 @@ vertex tMidPoint(const triangle& t);
 vertex calculateReflection(const vertex& normal, const vertex& ray);
 
 Mesh3d importSTL(const std::string& filename);
+Mesh3d importBinarySTL(const std::string& filename);
 
 
 #endif // MESH3D
