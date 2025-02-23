@@ -19,6 +19,11 @@ public:
     static double mutation_probability;
     static double mutation_range;
 
+    static double termination_ratio;
+
+    static uint32_t checkpoint_every;
+    static uint32_t export_every;
+
     static std::vector<vertex> rays;
 
     // Static method to load configuration from a file

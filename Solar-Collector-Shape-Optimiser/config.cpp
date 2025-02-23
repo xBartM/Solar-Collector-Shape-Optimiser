@@ -16,6 +16,11 @@ double Config::crossover_bias = 0.0;
 double Config::mutation_probability = 0.0;
 double Config::mutation_range = 0.0;
 
+double Config::termination_ratio = 0.0;
+
+uint32_t Config::checkpoint_every = 0;
+uint32_t Config::export_every = 0;
+
 std::vector<vertex> Config::rays;
 std::map<std::string, std::string> Config::settings;
 
@@ -84,6 +89,11 @@ void Config::loadFromFile(const std::string& filename) {
         crossover_bias = std::stod(settings.at("crossover_bias"));
         mutation_probability = std::stod(settings.at("mutation_probability"));
         mutation_range = std::stod(settings.at("mutation_range"));
+
+        termination_ratio = std::stod(settings.at("termination_ratio"));
+
+        checkpoint_every = std::stoul(settings.at("checkpoint_every"));
+        export_every = std::stoul(settings.at("export_every"));
     
     } catch (const std::out_of_range& oor) {
         throw std::runtime_error("Missing or invalid configuration value: " + std::string(oor.what()));

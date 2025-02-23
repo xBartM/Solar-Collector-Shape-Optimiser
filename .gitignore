@@ -4,4 +4,5 @@ solar_optimiser
 *.stl
 gmon.out
 profile_report*
+/checkpoint
 

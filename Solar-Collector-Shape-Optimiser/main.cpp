@@ -61,6 +61,11 @@ int main (int argc, char** argv)
     const double mutation_probability = Config::mutation_probability;
     const double mutation_range       = Config::mutation_range;
 
+    const double termination_ratio = Config::termination_ratio;
+
+    const uint32_t checkpoint_every = Config::checkpoint_every;
+    const uint32_t export_every     = Config::export_every;
+
     const std::vector<vertex> rays = Config::rays; 
 
     uint32_t generation = 0;  // number of current generation
@@ -143,11 +148,11 @@ int main (int argc, char** argv)
         printTime("Sorting and printing: "); 
 
         // replace weak indivituals
-        for (uint32_t i = popsize - popsize / 2; i < popsize; ++i) {
+        for (uint32_t i = popsize * (1 - termination_ratio); i < popsize; ++i) {
             // Clear parents 
             parents.clear(); 
             // Select two random parents from the *top* 2/3 of the population.
-            std::sample(pop_idx.begin(), pop_idx.begin() + (popsize - popsize / 2), std::back_inserter(parents), 2, mt);
+            std::sample(pop_idx.begin(), pop_idx.begin() + (popsize * (1 - termination_ratio)), std::back_inserter(parents), 2, mt);
 
             // Create an offspring using the selected parents.
             const Genome offspring(population[parents[0]], population[parents[1]], crossover_bias, mutation_probability, mutation_range);
@@ -160,8 +165,8 @@ int main (int argc, char** argv)
 
 
         // export the best from the population once in a while
-        if (!(generation % 25)) {
-            population[pop_idx[0]].exportAsBinarySTL("Gen" + std::to_string(generation) + ".stl");
+        if (!(generation % export_every)) {
+            population[pop_idx[0]].exportAsBinarySTL("Gen" + std::to_string(generation) + "Fit" + std::to_string(int(population[pop_idx[0]].fitness)) + ".stl");
             printTime("Export: "); 
 
         }
