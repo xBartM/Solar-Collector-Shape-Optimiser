@@ -66,6 +66,8 @@ int main (int argc, char** argv)
     const uint32_t checkpoint_every = Config::checkpoint_every;
     const uint32_t export_every     = Config::export_every;
 
+    const bool start_from_checkpoint = Config::start_from_checkpoint;
+
     const std::vector<vertex> rays = Config::rays; 
 
     uint32_t generation = 0;  // number of current generation
@@ -88,13 +90,30 @@ int main (int argc, char** argv)
     // create a population and a pointer to each index
     std::vector<SolarCollector> population;
     std::vector<uint32_t> pop_idx;
+    bool start_from_checkpoint_noerror = true; // if error is encountered upon reading from file ignore the rest
     // reserve space to avoid reallocations
     population.reserve(popsize); 
     pop_idx.reserve(popsize); 
-    for (uint32_t i = 0, j = 0; i < popsize; i++, j++) {
-        population.emplace_back(xsize, ysize, hmax, &obs);
-        for (uint32_t k = 0; k < xsize*ysize; k++)
-            population[i].setXY(k, 0, hdist(mt));
+    for (uint32_t i = 0; i < popsize; i++) {
+        if (start_from_checkpoint && start_from_checkpoint_noerror) {
+            try {
+                const Genome temp_g = deserializeFromFile("./checkpoint/" + std::to_string(i) + ".genome");
+                population.emplace_back(xsize, ysize, hmax, &obs, temp_g);
+            } catch (const std::runtime_error& e) {
+                std::cerr << "Deserialization error: " << e.what() << std::endl;
+                // set the flag to ignore the rest of serialized Genomes
+                start_from_checkpoint_noerror = false;
+                // go back one step in iteration (no Genome inserted this time)
+                --i;
+                // skip recomputing the mesh and DON'T push_back the same index again
+                continue;
+            }
+        }
+        else {
+            population.emplace_back(xsize, ysize, hmax, &obs);
+            for (uint32_t k = 0; k < xsize*ysize; k++)
+                population[i].setXY(k, 0, hdist(mt));
+        }
         population[i].computeMesh();
         // populate pop_idx with indices (from 0 to population)
         pop_idx.push_back(i); 
@@ -151,7 +170,7 @@ int main (int argc, char** argv)
         for (uint32_t i = popsize * (1 - termination_ratio); i < popsize; ++i) {
             // Clear parents 
             parents.clear(); 
-            // Select two random parents from the *top* 2/3 of the population.
+            // Select two random parents from the *top* 1-termination_ratio of the population.
             std::sample(pop_idx.begin(), pop_idx.begin() + (popsize * (1 - termination_ratio)), std::back_inserter(parents), 2, mt);
 
             // Create an offspring using the selected parents.
@@ -170,7 +189,17 @@ int main (int argc, char** argv)
             printTime("Export: "); 
 
         }
+
         ++generation;
+
+        // make a checkpoint of current population AFTER ++gen so that gen0 isn't checkpointed (huge QOL :))
+        if (!(generation % checkpoint_every)) {
+            for (uint32_t i = 0 ; i < popsize; ++i) {
+                serializeToFile(population[pop_idx[i]], "./checkpoint/" + std::to_string(i) + ".genome");
+            }
+            printTime("Checkpoint: "); 
+        }
+
         // if (generation == 3) return 0;
 
     }

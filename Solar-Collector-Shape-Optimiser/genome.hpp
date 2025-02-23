@@ -5,6 +5,7 @@
 #include <vector>
 #include <random>
 #include <limits>
+#include <string>
 
 
 // note to self: it's good that dna is unique, meaning that the order of "genes" matters (ex. 100101 gives a different specimen than any other permutation of genes of this length)
@@ -32,5 +33,7 @@ public:
 
 };
 
+void serializeToFile(const Genome& genome, const std::string& filename);
+Genome deserializeFromFile(const std::string& filename);
 
 #endif // GENOME_HPP

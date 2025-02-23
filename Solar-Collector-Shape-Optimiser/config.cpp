@@ -21,6 +21,8 @@ double Config::termination_ratio = 0.0;
 uint32_t Config::checkpoint_every = 0;
 uint32_t Config::export_every = 0;
 
+bool Config::start_from_checkpoint = false;
+
 std::vector<vertex> Config::rays;
 std::map<std::string, std::string> Config::settings;
 
@@ -94,6 +96,8 @@ void Config::loadFromFile(const std::string& filename) {
 
         checkpoint_every = std::stoul(settings.at("checkpoint_every"));
         export_every = std::stoul(settings.at("export_every"));
+
+        start_from_checkpoint = settings.at("start_from_checkpoint")=="true";
     
     } catch (const std::out_of_range& oor) {
         throw std::runtime_error("Missing or invalid configuration value: " + std::string(oor.what()));

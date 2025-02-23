@@ -2,6 +2,9 @@
 #include <vector>
 #include <ostream>
 #include <execution>
+#include <sstream>
+#include <fstream>
+// #include <stdexcept>
 
 #include <Solar-Collector-Shape-Optimiser/genome.hpp>
 
@@ -81,3 +84,84 @@ std::ostream& operator<<(std::ostream& os, const Genome& genome) {
     return os;
 }
 
+void serializeToFile(const Genome& genome, const std::string& filename) {
+    std::stringstream ss;
+
+    std::ofstream file(filename, std::ios::out); // Open in text mode
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file for writing: " + filename);
+    }
+    
+    // Serialize basic members.  Use a consistent, easily parsable format.
+    ss << genome.dna_size << " ";
+    ss << genome.fitness << " ";
+    ss << genome.dna_min << " ";
+    ss << genome.dna_max << " ";
+
+    // Serialize the DNA vector.  Iterate and add each element to the stream.
+    for (const double& gene : genome.dna) {
+        ss << gene << " ";
+    }
+
+    file << ss.rdbuf();
+
+    if (file.fail()) {
+        throw std::runtime_error("Error writing to file: " + filename);
+    }
+    file.close(); // Explicit close for clarity (RAII handles it, but this is good practice)
+}
+
+Genome deserializeFromFile(const std::string& filename) {
+    uint32_t dna_size;
+    double fitness;
+    double dna_min, dna_max;
+    std::vector<double> dna;
+    double gene;
+        
+    std::ifstream file(filename, std::ios::in);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file for reading: " + filename);
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf(); // Read entire file into a stringstream
+        if (file.fail() && !file.eof()) {  // failbit set, but not due to EOF (e.g., read error, permission)
+        throw std::runtime_error("Error reading from file: " + filename);
+    }
+    file.close(); // Explicit close (RAII handles it, but it's good practice)
+
+
+    // Deserialize basic members.  Match the order and format used in serialize().
+    if (!(buffer >> dna_size)) {
+        throw std::runtime_error("Failed to deserialize dna_size.");
+    }
+    if (!(buffer >> fitness)) {
+        throw std::runtime_error("Failed to deserialize fitness.");
+    }
+    if (!(buffer >> dna_min)) {
+        throw std::runtime_error("Failed to deserialize dna_min.");
+    }
+    if (!(buffer >> dna_max)) {
+        throw std::runtime_error("Failed to deserialize dna_max.");
+    }
+
+    // Deserialize the DNA vector. Read until the end of the stream.
+    while (buffer >> gene) {
+        dna.push_back(gene);
+    }
+        // Check for errors during DNA vector deserialization
+    if (buffer.fail() && !buffer.eof()) {  // failbit set, but not due to EOF
+        throw std::runtime_error("Failed to deserialize dna vector: invalid data.");
+    }
+
+    if (dna.size() != dna_size) {
+        throw std::runtime_error("Deserialized DNA size mismatch. Expected: " + std::to_string(dna_size) + ", got: " + std::to_string(dna.size()));
+    }
+
+    // Create and return the Genome object.
+    Genome genome(dna_size, dna_min, dna_max); // Use constructor to initialize
+    genome.dna = std::move(dna);             // Efficient move assignment
+    genome.fitness = fitness;
+
+    return genome;
+
+}
