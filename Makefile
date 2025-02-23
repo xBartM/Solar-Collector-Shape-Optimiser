@@ -21,7 +21,9 @@ ARMV7_TARGET = solar_optimiser_armv7
 SOURCES = Solar-Collector-Shape-Optimiser/main.cpp \
 		  Solar-Collector-Shape-Optimiser/mesh3d.cpp \
           Solar-Collector-Shape-Optimiser/genome.cpp \
-          Solar-Collector-Shape-Optimiser/solarcollector.cpp 
+          Solar-Collector-Shape-Optimiser/solarcollector.cpp \
+          Solar-Collector-Shape-Optimiser/config.cpp 
+
 		  
 
 # Object files (will be placed in the current directory)

@@ -13,6 +13,7 @@
 #endif // NO_STD_EXECUTION
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
+#include <Solar-Collector-Shape-Optimiser/config.hpp>
 
 #define MAIN_TIMED
 
@@ -38,28 +39,32 @@ void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint3
 int main (int argc, char** argv)
 {
 
-    uint32_t xsize;   // size of the panel (in mm preferably?)
-    uint32_t ysize;   // -||-
-    uint32_t hmax;    // max height of a panel
-    uint32_t popsize; // size of the population
+    // --- Load Configuration ---
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <config_file_path>" << std::endl;
+        return 1;
+    }
+
+    try {
+        Config::loadFromFile(argv[1]);
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
+    // +1 because, ex.: xsize, ysize = 2, 2 gives 2 triangles/1 square with a side of length 1mm
+    const uint32_t xsize   = Config::xsize+1; // size of the panel (in mm preferably?)
+    const uint32_t ysize   = Config::ysize+1; // -||-
+    const uint32_t hmax    = Config::hmax+1; // max height of a panel
+    const uint32_t popsize = Config::popsize; // size of the population
+
+    const double crossover_bias       = Config::crossover_bias;
+    const double mutation_probability = Config::mutation_probability;
+    const double mutation_range       = Config::mutation_range;
+
+    const std::vector<vertex> rays = Config::rays; 
 
     uint32_t generation = 0;  // number of current generation
-    const vertex ray(0, -1, 0);
-    const std::vector<vertex> rays({ray});
 
-    // +1 because, ex.: xsize, ysize = 2, 2 gives 2 triangles/1 square with a side of length 1mm
-    if (argc == 5) {
-        xsize   = std::stoul(argv[1])+1;
-        ysize   = std::stoul(argv[2])+1;
-        hmax    = std::stoul(argv[3])+1;
-        popsize = std::stoul(argv[4]);
-    } else {
-        xsize   = 180+1;    // size of printbed (minus some spare space)
-        ysize   = 940+1;    // length of aluminum rod
-        hmax    = 180+1;    // height of printbed (minus some spare space)
-        // popsize = 200;       // make popsize divisible by 4 xd
-        popsize = 40;       // make popsize divisible by 4 xd
-    }
 
     std::random_device rd;
     std::mt19937 mt(rd());
@@ -68,7 +73,7 @@ int main (int argc, char** argv)
 
     printTime(""); // prime all MAIN_TIMED variables
 
-    const Mesh3d obs("obstacleBin.stl", (xsize-1.0)/2.0, (hmax-1.0)/2.0);
+    const Mesh3d obs("./obstacleBin.stl", (xsize-1.0)/2.0, (hmax-1.0)/2.0);
     // obs.exportBinarySTL("obstacleBin2.stl");
 
     printTime("Setting up the obstacle: "); 
@@ -145,7 +150,7 @@ int main (int argc, char** argv)
             std::sample(pop_idx.begin(), pop_idx.begin() + (popsize - popsize / 2), std::back_inserter(parents), 2, mt);
 
             // Create an offspring using the selected parents.
-            const Genome offspring(population[parents[0]], population[parents[1]], 0.6, 0.05, 0.225);
+            const Genome offspring(population[parents[0]], population[parents[1]], crossover_bias, mutation_probability, mutation_range);
 
             // Replace the weak individual (at pop_idx[i]) with the new offspring.
             population[pop_idx[i]] = SolarCollector(xsize, ysize, hmax, &obs, offspring);
