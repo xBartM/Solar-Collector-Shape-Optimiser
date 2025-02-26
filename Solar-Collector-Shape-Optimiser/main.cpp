@@ -14,25 +14,8 @@
 
 #include <Solar-Collector-Shape-Optimiser/solarcollector.hpp>
 #include <Solar-Collector-Shape-Optimiser/config.hpp>
+#include <Solar-Collector-Shape-Optimiser/stats.hpp>
 
-#define MAIN_TIMED
-
-void printTime(const std::string str)
-{
-    static auto start = std::chrono::high_resolution_clock::now();
-    static auto end = std::chrono::high_resolution_clock::now();
-    static std::chrono::duration<double> deltatime = end - start;
-
-    if (str == "") return;
-
-    #ifdef MAIN_TIMED
-    end = std::chrono::high_resolution_clock::now();
-    deltatime = end - start;
-    std::cerr << str << deltatime.count() << " s\n";
-    start = std::chrono::high_resolution_clock::now();
-    #endif // MAIN_TIMED
-
-}
 
 void findProperHmaxDist (const uint32_t xsize, const uint32_t ysize, const uint32_t hmax, const Mesh3d* obs);
 
@@ -70,6 +53,13 @@ int main (int argc, char** argv)
 
     const std::vector<vertex> rays = Config::rays; 
 
+    const std::string obs_load_time = "1.ObstacleLoad";
+    const std::string populating_time = "2.Populating";
+    const std::string fitness_comp_time = "1.FitnessComp";
+    const std::string crossover_and_mutate_time = "2.CrossMut";
+    const std::string export_time = "3.Export";
+    const std::string checkpoint_time = "4.Checkpoint";
+
     uint32_t generation = 0;  // number of current generation
 
 
@@ -78,12 +68,13 @@ int main (int argc, char** argv)
     // std::uniform_real_distribution<double> dist(0.0, 0.45);//(double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
     std::uniform_real_distribution<double> hdist(0.0, (double)hmax); // educated guess? for example take the average of 20 runs with same settings, and increment denominator. find best place to start
 
-    printTime(""); // prime all MAIN_TIMED variables
+    Stats::begin(obs_load_time);
 
     const Mesh3d obs("./obstacleBin.stl", (xsize-1.0)/2.0, (hmax-1.0)/2.0);
     // obs.exportBinarySTL("obstacleBin2.stl");
 
-    printTime("Setting up the obstacle: "); 
+    Stats::end(obs_load_time); 
+    Stats::begin(populating_time);
 
     // findProperHmaxDist(xsize, ysize, hmax, &obs);
 
@@ -130,10 +121,11 @@ int main (int argc, char** argv)
     }
     std::cout << std::endl;
 
-    printTime("Setting up the population: "); 
+    Stats::end(populating_time); Stats::show(); Stats::clear();
 
     while (true)
     {
+        Stats::begin(fitness_comp_time);
 
         #ifndef NO_STD_EXECUTION
             std::for_each(std::execution::par_unseq, population.begin(), population.end(), [&](auto& pop) {
@@ -150,7 +142,7 @@ int main (int argc, char** argv)
             }
         #endif // NO_STD_EXECUTION
 
-        printTime("Computing fitness: "); 
+        Stats::end(fitness_comp_time);
 
         // sorted best to worst using indices
         sort(pop_idx.begin(), pop_idx.end(), [&](const uint32_t a, const uint32_t b) {
@@ -164,7 +156,7 @@ int main (int argc, char** argv)
         }
         std::cout << std::endl;
 
-        printTime("Sorting and printing: "); 
+        Stats::begin(crossover_and_mutate_time);
 
         // replace weak indivituals
         for (uint32_t i = popsize * (1 - termination_ratio); i < popsize; ++i) {
@@ -180,13 +172,14 @@ int main (int argc, char** argv)
             population[pop_idx[i]] = SolarCollector(xsize, ysize, hmax, &obs, offspring);
         }
          
-        printTime("Crossover and mutation: "); 
+        Stats::end(crossover_and_mutate_time);
 
 
         // export the best from the population once in a while
         if (!(generation % export_every)) {
+            Stats::begin(export_time);
             population[pop_idx[0]].exportAsBinarySTL("Gen" + std::to_string(generation) + "Fit" + std::to_string(int(population[pop_idx[0]].fitness)) + ".stl");
-            printTime("Export: "); 
+            Stats::end(export_time);
 
         }
 
@@ -194,13 +187,15 @@ int main (int argc, char** argv)
 
         // make a checkpoint of current population AFTER ++gen so that gen0 isn't checkpointed (huge QOL :))
         if (!(generation % checkpoint_every)) {
+            Stats::begin(checkpoint_time);
             for (uint32_t i = 0 ; i < popsize; ++i) {
                 serializeToFile(population[pop_idx[i]], "./checkpoint/" + std::to_string(i) + ".genome");
             }
-            printTime("Checkpoint: "); 
+            Stats::end(checkpoint_time); 
         }
 
         // if (generation == 3) return 0;
+        Stats::show();
 
     }
 

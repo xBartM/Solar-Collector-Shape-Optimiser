@@ -22,7 +22,8 @@ SOURCES = Solar-Collector-Shape-Optimiser/main.cpp \
 		  Solar-Collector-Shape-Optimiser/mesh3d.cpp \
           Solar-Collector-Shape-Optimiser/genome.cpp \
           Solar-Collector-Shape-Optimiser/solarcollector.cpp \
-          Solar-Collector-Shape-Optimiser/config.cpp 
+          Solar-Collector-Shape-Optimiser/config.cpp \
+          Solar-Collector-Shape-Optimiser/stats.cpp 
 
 		  
 
