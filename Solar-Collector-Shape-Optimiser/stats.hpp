@@ -24,8 +24,11 @@ class Stats {
 
 public:
     // Static methods to time and show statistics
+    // time related
     static void begin(const std::string& stat_name);
     static void end(const std::string& stat_name);
+    // generation stats
+    // other
     static void show();
     static void clear();
 
