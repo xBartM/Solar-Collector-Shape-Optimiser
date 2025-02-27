@@ -46,7 +46,7 @@ void Stats::show() {
     }
 
     for (auto& [stat_name, history] : stats) {
-        std::cerr << stat_name << ":  ";
+        std::cerr << stat_name << ":\t";
 
         // Calculate statistics
         if (!history.empty()) {

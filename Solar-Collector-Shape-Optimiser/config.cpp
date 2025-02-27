@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include "Solar-Collector-Shape-Optimiser/config.hpp"
 

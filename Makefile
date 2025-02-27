@@ -14,7 +14,7 @@ CXXFLAGS = $(COMMON_CXXFLAGS)
 # --- ARMv7 Target ---
 ARMV7_CXX = arm-linux-androideabi-g++  # Use your ARM cross-compiler!  IMPORTANT!
 ARMV7_CXXFLAGS = $(COMMON_CXXFLAGS) -DNO_STD_EXECUTION -fopenmp
-ARMV7_LDFLAGS = $(COMMON_LDFLAGS) 
+# ARMV7_LDFLAGS = $(COMMON_LDFLAGS) 
 ARMV7_TARGET = solar_optimiser_armv7
 
 # Source files (all in the Solar-Collector-Shape-Optimiser folder)
