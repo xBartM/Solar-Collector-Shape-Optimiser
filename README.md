@@ -1,14 +1,14 @@
-# WORK IN PROGRESS (suspended - read Preface and Endnotes)
+# WORK IN PROGRESS (suspended - see Preface and Endnotes)
 
 # Solar Collector Shape Optimizer
 
-This project aims to optimize the shape of a solar collector to maximize its efficiency in reflecting light onto a predefined obstacle. It uses a genetic algorithm to evolve the shape of the collector, represented as a 3D mesh. The project is written in C++23 and uses the STL.
+This project aims to optimize the shape of a solar collector to maximize its efficiency in reflecting light onto a predefined obstacle. It uses a genetic algorithm to evolve the shape of the collector, represented as a 3D mesh. The project is written in C++23 and utilizes the STL.
 
 ## Preface
 
-Originally I wrote this project in 2021/2022. It's performance was terrible so I used CUDA kernels to speed the execution up. I wanted to revisit this project for I thought I could make it better. I changed it's structure to a more standardized one, refactored it so it's easier to maintain and understand, I made it 100x-1000x faster (on CPU) via various means, I changed data structure from AoS to SoA architecture to maximize parallel performance, I added another build target so it's easy to build in Termux (terminal emulator for Android), I removed the duplicated and/or unnecessary code, I added a ton of new functionalities...
+Originally I wrote this project in 2021/2022. Its performance was terrible, so I used CUDA kernels to speed the execution up. I wanted to revisit this project for I thought I could improve it. I changed its structure to a more standardized one, refactored it to be easier to maintain and understand, made it 100x-1000x faster (on CPU) via various means, changed the data structure from an AoS (array of Structures) to an SoA (Structure of Arrays) architecture to maximize parallel performance, added another build target for easy building in Termux (a terminal emulator for Android), removed duplicated and/or unnecessary code, added a ton of new functionalities...
 
-It never occured to me, that using Genetic Algorithm to optimize a 3D mesh (that starts out as random noise) might **not be a viable solution**. So please, consider this work as an adventureous endeavor of a curious mind, and **NOT** as a solution to the given problem. Make yourself a favour and use existing libraries for 3D mesh optimization (might be using GA, might not) and define a problem before attempting to solve it. More on that at the end of this file.
+It never occured to me that using a Genetic Algorithm to optimize a 3D mesh starting from random noise might **not be the most efficient solution**. Therefore, consider this work an adventureous endeavor of a curious mind, and **not** as a definitive solution to the given problem. I recommend (for your own sake) exploring existing libraries for 3D mesh optimization (which may or may not be using GA) and clearly defining the problem before attempting to solve it. More on this in the Endnotes.
 
 ## Project Structure
 
@@ -27,7 +27,7 @@ The project is organized into the following files:
     -   **`solarcollector.cpp`**:  Implements the `SolarCollector` class.  This class inherits from `Genome` and represents a single solar collector instance. It includes methods to compute the mesh, calculate fitness, and interact with the obstacle.
     -   **`solarcollector.hpp`**:  Header file for `solarcollector.cpp`.
     -   **`stats.cpp`**: Implements a simple statistics class to track and display timing information for different parts of the program.
-    -   **`stats.hpp`**: Header file for `stats.cpp`
+    -   **`stats.hpp`**: Header file for `stats.cpp`.
 
 ## Dependencies
 
@@ -130,7 +130,7 @@ The program saves checkpoints of the population to the `./checkpoint/` directory
 
 ## Parallelism
 
-The code uses a preprocessor macro `#ifndef NO_STD_EXECUTION` to conditionally compile with either `std::execution::par_unseq` for parallel execution using the C++ standard library or OpenMP pragmas (`#pragma omp parallel for`) if `NO_STD_EXECUTION` is defined.  This allows for flexibility in choosing the parallel execution backend (convenient when working with old architectures).
+The code uses a preprocessor macro `#ifndef NO_STD_EXECUTION` to conditionally compile with either `std::execution::par_unseq` for parallel execution using the C++ standard library or OpenMP pragmas (`#pragma omp parallel for`) if `NO_STD_EXECUTION` is defined.  This allows for flexibility in choosing the parallel execution backend (convenient when working with older architectures).
 
 ## Potential Improvements
 
@@ -140,48 +140,47 @@ The code uses a preprocessor macro `#ifndef NO_STD_EXECUTION` to conditionally c
 
 ## Endnotes
 
-This project was supposed to help me with coming up with an optimised shape of reflecting surfaces for solar thermal collector farm. I've noticed early on that it would be faster (and maybe easier) to do it using Mathematical Programming (future project?) as the domain would (most likely) be convex. I decided that I will continue this project as I've already put extensive amount of time into it. Given repository is a state of the project I'm leaving it at due to time constraints and exhaustion of knowledge base it provides.
+This project was supposed to help me with coming up with an optimised shape of reflecting surfaces for solar thermal collector farm. I noticed early on that it would be faster (and perhaps easier) to use Mathematical Programming (future project?), as the domain would likely be convex. I decided to continue this project, as I had already invested extensive amount of time in it. This repository represents the state of the project as I'm leaving it at, due to time constraints and exhaustion of the knowledge base it was able to provide (for now).
 
-This project taught me a lot: 
--	Pattern recognition in coding 
-	+	Problem related - many problems share the same root and can be approached similarly.
-	+	Visual code inspection - getting around the code (both new and old) by skimming and not reading every single line to understand it.
--	LLM use
-	+	Massive boost in productivity, if applied correctly.
-	+	"Fallback pattern recognition engine" for when structuring fundamentals in a new domain (e.g., making sense of new information in new environments).
--	Working with documentation (C++ reference) - complex constructs give shorter, less bug-prone code (another area where LLMs come in handy).
--	Importance of consulting experts and asking right quesions
-	+	You can do anything but you can't do everything
-	+	You can't learn every aspect of every tool you use
-	+	Other people most likely sumbled upon same (or symmetric) problems and left a trace of their knowledge somewhere on the Internet - use it.
+This project taught me a lot:
+
+-	**Pattern recognition in Coding:**
+	+	**Problem-related:** Many problems share the same root and can be approached similarly.
+	+	**Visual Code Inspection:** Getting around the code (both new and old) by skimming and not reading every single line to understand it.
+-	**LLM Use:**
+	+	Massive **boost in productivity**, if applied correctly.
+	+	**"Fallback pattern-recognition engine":** For structuring fundamentals in a new domain (e.g., making sense of new information in new environments).
+-	**Working with Documentation (C++ reference):** Complex constructs can lead to shorter, less bug-prone code (another area where LLMs are helpful).
+-	Importance of **Consulting Experts** and **Asking the Right Quesions:**
+	+	You can't learn every aspect of every tool you use.
+	+	Other people have likely stumbled upon **same (or symmetric) problems** and left a trace of their knowledge somewhere on the Internet - **use it**.
+	+	You **can do anything**, but you **can't do everything**.
 
 ### Takeaways
 
--	**Programming is a tool**, not a musical instrument. It's used to achieve results, not to be a virtuoso (there are exceptions obviously).
--	**Don't write your own implementation** of existing tools without a reason (be it educational, performance related, license related, or other **WELL DEFINED** one).
--	**Don't optimize prematurely**. Make sure the code is bug-free, implement all functionalities, **FINISH** what you set out to build - then you can think about *profiling* and finally *optimising*.
--	Clash your current state and plans against **priority inversion** scenario (concept well-known in sheduling).
--	Once in a while **consider stepping away** from focused work on how to solve a set subproblems, and take a look at the **bigger picture** of what's actually happening:
-	+	**Look back** at the path from the past to now:
-		*	What were the projects assumptions at the beginning?
+-	**Programming is a tool**, not a musical instrument. It's used to achieve results, not for virtuosity (though there are exceptions).
+-	**Don't write your own implementation** of existing tools without a reason (be it educational, performance-related, licensing, or other **well-defined** one).
+-	**Don't optimize prematurely**. Ensure the code is bug-free, implement all functionalities, **finish** what you set out to build - then you can think about *profiling* and finally *optimising*.
+-	Clash your current project state and plans against a **priority inversion** scenario (a concept well-known in sheduling).
+-	Once in a while **consider stepping away** from focused work on solving specific subproblems and look at the **bigger picture** of what's actually happening:
+	+	**Look Back** at the path from the past to now:
+		*	What were the project's initial assumptions?
 		*	Weren't they already met at some point?
-		*	Have they evolved? And how?
-	+	**Look around** as the world changes rapidly:
+		*	Have they evolved, and if so, how?
+	+	**Look Around**, as the world changes rapidly:
 		*	Are the assumptions still relevant?
 		*	Is there still a need (internal or external) for what you're working on?
-		*	Are there any new tools that can help (enhance productivity, speedup testing and deployment, etc.)?
-	+	**Look ahead**, check and revise your plans:
-		*	Is the subproblem in your project you're working on actually important? 
-		*	Will it save money or time or bring any other added value?
-		*	How does your roadmap compare against real life?
-	+	**Look ahead (IRL)** as there might be something move valuable (monetary or otherwise) on the horizon:
+		*	Are there any new tools that can help (enhance productivity, speed up testing and deployment, etc.)?
+	+	**Look Ahead**, check and revise your plans:
+		*	Is the (sub)problem you're working on actually important?
+		*	Will it save money or time, or bring any other added value?
+		*	How does your roadmap compare to real life?
+	+	**Look Ahead (IRL)**, as there might be something move valuable (monetarily or otherwise) on the horizon:
 		*	Does the thing you're pursuing actually matter **TO YOU**?
 		*	What are your priorities?
-		*	Are you on a path you want to be at?
+		*	Are you on a path you want to be on?
 
 ### Last words
 
-*Every project you'll ever work on will be unfinished as the depth of any one problem is infinite.*  
-Consider properly defining a scope and constraining yourself to a set of requirements and assumptions - loosen them when needed, tighten them whenever possible.
-
-
+*Every project you'll ever work on will be unfinished, as the depth of any one problem is infinite.*  
+Consider properly defining a scope of your project and constraining yourself to a set of requirements and assumptions - loosen them *when needed*, and tighten them *whenever possible*.
