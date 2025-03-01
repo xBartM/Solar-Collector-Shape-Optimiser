@@ -6,7 +6,7 @@ This project aims to optimize the shape of a solar collector to maximize its eff
 
 ## Preface
 
-Originally I wrote this project in 2021/2022. It's performance was terrible but it used CUDA kernels to speed the execution up. I wanted to revisit this project for I thought I could make it better. I changed it's structure to a more standardized one, refactored it so it's easier to maintain and understand, I made it 100x-1000x faster (on CPU) via various means, I changed data structure from AoS to SoA architecture to maximize parallel performance, I added another build target so it's easy to build on Termux (terminal emulator for Android), I removed the duplicated and/or unnecessary code, I added a ton of new functionalities...
+Originally I wrote this project in 2021/2022. It's performance was terrible so I used CUDA kernels to speed the execution up. I wanted to revisit this project for I thought I could make it better. I changed it's structure to a more standardized one, refactored it so it's easier to maintain and understand, I made it 100x-1000x faster (on CPU) via various means, I changed data structure from AoS to SoA architecture to maximize parallel performance, I added another build target so it's easy to build in Termux (terminal emulator for Android), I removed the duplicated and/or unnecessary code, I added a ton of new functionalities...
 
 It never occured to me, that using Genetic Algorithm to optimize a 3D mesh (that starts out as random noise) might **not be a viable solution**. So please, consider this work as an adventureous endeavor of a curious mind, and **NOT** as a solution to the given problem. Make yourself a favour and use existing libraries for 3D mesh optimization (might be using GA, might not) and define a problem before attempting to solve it. More on that at the end of this file.
 
@@ -32,7 +32,6 @@ The project is organized into the following files:
 ## Dependencies
 
 -   C++23 compliant compiler
--   STL (Standard Template Library)
 -   For x86-64 (default)
 	+   TBB (Threading Building Blocks) library (`-ltbb`) for parallel execution.
 -	For ARMv7 (e.g., Termux on an old 32-bit smartphone)
@@ -58,7 +57,6 @@ make armv7
 ```
 
 This will create an executable named `solar_optimiser_armv7`.
-The `Makefile` automatically uses `-fopenmp` for the ARMv7 target.
 
 ### Cleaning
 
@@ -85,7 +83,7 @@ The `config.cfg` file controls the parameters of the genetic algorithm and the s
 -   **`start_from_checkpoint`**:  Whether to load the population from a checkpoint (boolean, `true` or anything else for false).
 -   **`ray`**:  Direction of the incoming light ray, specified as `x,y,z` (doubles). Multiple rays can be specified by adding multiple `ray` lines.
 
-Example (provided also in `config.cfg` file):
+Example (also provided in `config.cfg` file):
 
 ```config
 # Example configuration
@@ -132,22 +130,36 @@ The program saves checkpoints of the population to the `./checkpoint/` directory
 
 ## Parallelism
 
-The code uses `#ifndef NO_STD_EXECUTION` to conditionally compile with either `std::execution::unseq` for parallel execution using the C++ standard library or OpenMP pragmas (`#pragma omp parallel for`) if `NO_STD_EXECUTION` is defined.  This allows for flexibility in choosing the parallel execution backend (important when working with old architectures).
+The code uses a preprocessor macro `#ifndef NO_STD_EXECUTION` to conditionally compile with either `std::execution::par_unseq` for parallel execution using the C++ standard library or OpenMP pragmas (`#pragma omp parallel for`) if `NO_STD_EXECUTION` is defined.  This allows for flexibility in choosing the parallel execution backend (convenient when working with old architectures).
 
 ## Potential Improvements
 
--   **More general obstacle handling:**  Setting up custom obstacle needs some knowledge of this project's structure.
+-   **More general obstacle handling:**  Setting up custom obstacle could be imrpoved and better documented (now it needs deeper knowledge of this project's structure).
 -   **Adaptive mutation:** Dynamically adjust the mutation rate and range based on the progress of the genetic algorithm.
 -   **GUI:** Create a graphical user interface to visualize the simulation and control parameters.
 
 ## Endnotes
 
-This project taught me a lot: from pattern recognition in coding (both problem related and visual code inspection related)
+This project was supposed to help me with coming up with an optimised shape of reflecting surfaces for solar thermal collector farm. I've noticed early on that it would be faster (and maybe easier) to do it using Mathematical Programming (future project?) as the domain would (most likely) be convex. I decided that I will continue this project as I've already put extensive amount of time into it. Given repository is a state of the project I'm leaving it at due to time constraints and exhaustion of knowledge base it provides.
+
+This project taught me a lot: 
+-	Pattern recognition in coding 
+	+	Problem related - many problems share the same root and can be approached similarly.
+	+	Visual code inspection - getting around the code (both new and old) by skimming and not reading every single line to understand it.
+-	LLM use
+	+	Massive boost in productivity, if applied correctly.
+	+	"Fallback pattern recognition engine" for when structuring fundamentals in a new domain (e.g., making sense of new information in new environments).
+-	Working with documentation (C++ reference) - complex constructs give shorter, less bug-prone code (another area where LLMs come in handy).
+-	Importance of consulting experts and asking right quesions
+	+	You can do anything but you can't do everything
+	+	You can't learn every aspect of every tool you use
+	+	Other people most likely sumbled upon same (or symmetric) problems and left a trace of their knowledge somewhere on the Internet - use it.
 
 ### Takeaways
 
+-	**Programming is a tool**, not a musical instrument. It's used to achieve results, not to be a virtuoso (there are exceptions obviously).
 -	**Don't write your own implementation** of existing tools without a reason (be it educational, performance related, license related, or other **WELL DEFINED** one).
--	**Don't optimize prematurely** -- ushort * ushort / ushort fits in ushort but it still **overflows**
+-	**Don't optimize prematurely**. Make sure the code is bug-free, implement all functionalities, **FINISH** what you set out to build - then you can think about *profiling* and finally *optimising*.
 -	Clash your current state and plans against **priority inversion** scenario (concept well-known in sheduling).
 -	Once in a while **consider stepping away** from focused work on how to solve a set subproblems, and take a look at the **bigger picture** of what's actually happening:
 	+	**Look back** at the path from the past to now:
@@ -166,7 +178,10 @@ This project taught me a lot: from pattern recognition in coding (both problem r
 		*	Does the thing you're pursuing actually matter **TO YOU**?
 		*	What are your priorities?
 		*	Are you on a path you want to be at?
-		*	
 
+### Last words
+
+*Every project you'll ever work on will be unfinished as the depth of any one problem is infinite.*  
+Consider properly defining a scope and constraining yourself to a set of requirements and assumptions - loosen them when needed, tighten them whenever possible.
 
 
